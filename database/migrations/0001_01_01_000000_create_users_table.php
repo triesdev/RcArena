@@ -22,6 +22,7 @@ return new class extends Migration
             $table->enum('user_type', ['cms', 'mobile'])->nullable();
             $table->enum('user_type_mobile', ['coordinator', 'regular'])->nullable();
             $table->string('api_token')->nullable();
+            $table->string('panel_token')->nullable();
             $table->boolean('is_active')->default(1);
             $table->tinyInteger('role_id');
             $table->string("image_uri")->nullable();

@@ -7,6 +7,5 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MenuRole extends Model
 {
-    protected $table = 'menu_role';
     protected $guarded = ['id'];
 }

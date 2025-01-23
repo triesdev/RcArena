@@ -1,16 +1,17 @@
 <?php
 
-use App\Http\Controllers\API\AccountController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
-use App\Http\Controllers\API\MenuController;
-use App\Http\Controllers\API\MenuRoleController;
+use App\Http\Controllers\API\EventController;
 use App\Http\Controllers\API\ReportController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\TransactionController;
-use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\Panel\MenuController;
+use App\Http\Controllers\Panel\MenuRoleController;
+use App\Http\Controllers\Panel\PanelAuthController;
+use App\Http\Controllers\Panel\UserController;
 use App\Http\Middleware\ApiToken;
-use App\Http\Controllers\API\EventController;
+use App\Http\Middleware\PanelToken;
+use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () {
     // Auth
@@ -37,4 +38,20 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
     Route::get("menu-tree", [MenuRoleController::class, "menuTree"]);
 });
 
-//require 'v1-mobile-api.php';
+Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], function () {
+    // Auth
+    Route::post("login", [PanelAuthController::class, "login"])->withoutMiddleware([PanelToken::class]);
+    Route::get("auth", [PanelAuthController::class, "auth"]);
+    Route::post("logout", [PanelAuthController::class, "logout"]);
+
+    // Account
+    Route::resource("users", UserController::class);
+    Route::resource("roles", RoleController::class);
+    Route::resource("menus", MenuController::class);
+    Route::resource("menu-role", MenuRoleController::class);
+    Route::resource("transactions", TransactionController::class);
+
+    Route::get("menu-tree", [MenuRoleController::class, "menuTree"]);
+
+    Route::get("report/balance-sheet", [ReportController::class, "balanceSheet"]);
+});

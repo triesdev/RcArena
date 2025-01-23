@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('parent_id')->nullable();
             $table->integer('order')->nullable();
-            $table->enum('type', ['menu', 'title']);
+            $table->enum('type', ['menu', 'title', 'submenu']);
             $table->string('url');
             $table->string('name')->unique();
             $table->string('title');
