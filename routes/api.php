@@ -28,6 +28,9 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
     Route::get("events-home", [EventController::class, "getEventHome"]);
     Route::get("events-detail/{id}", [EventController::class, "getEventDetail"]);
 
+    // Tickets
+
+
     Route::resource("roles", RoleController::class);
     Route::resource("menus", MenuController::class);
     Route::resource("menu-role", MenuRoleController::class);
