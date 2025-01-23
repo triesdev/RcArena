@@ -3,31 +3,45 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\ApiController;
-use App\Http\Controllers\Controller;
+use App\Models\EventClass;
 use App\Models\Ticket;
 use App\Models\TicketBundle;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TicketController extends ApiController
 {
-    public function getTicketByEventId($id)
+    public function getTicketByEventId(Request $request)
     {
         try {
-            $ticket_bundles = TicketBundle::whereEventId($id)->get();
+            $id = $request->input("event_id");
+
+            $selectRawTicketBundles = "ticket_bundles.id as ticket_bundle_id,ticket_bundles.name,ticket_bundles.price";
+            $ticket_bundles = TicketBundle::whereEventId($id)->selectRaw($selectRawTicketBundles)->get();
+
+            $selectRawTickets = "tickets.id as ticket_id,tickets.ticket_bundle_id,ticket_type,tickets.price,tickets.quota,tickets.quota_left,tickets.name as ticket_name, classes.id as class_id, classes.name as class_name";
+
             $ticket_bundle_ids = $ticket_bundles->pluck('id');
-            $ticket_by_bundle_ids = Ticket::whereIn('ticket_bundle_id', $ticket_bundle_ids)->get();
+            $ticket_by_bundle_ids = Ticket::leftJoinClass()->selectRaw($selectRawTickets)->get();
 
             // Get Ticket Bundles
             $ticket_bundles = $ticket_bundles->map(function ($ticket_bundle) use ($ticket_by_bundle_ids) {
-                $ticket_bundle->tickets = $ticket_by_bundle_ids->where('ticket_bundle_id', $ticket_bundle->id);
+                $ticket_bundle->tickets = $ticket_by_bundle_ids->where('ticket_bundle_id', $ticket_bundle->ticket_bundle_id)->flatten();
                 return $ticket_bundle;
             });
 
-            // Get Ticket per Picecs
-            $ticket_pieces = Ticket::whereNull("ticket_bundle_id")->get();
+            // Get Ticket per Pieces
+            $classes = EventClass::select("id as class_id","name as class_name")->whereEventId($id)->get();
 
-            $this->successResponse("Success", [
+            $ticket_pieces = $ticket_by_bundle_ids->where('ticket_bundle_id', null)->flatten();
+
+            foreach ($classes as $class) {
+               $class->tickets = $ticket_pieces->where('class_id', $class->class_id)->flatten();
+            }
+
+            return $this->successResponse("Success", [
                 "ticket_bundles" => $ticket_bundles,
-                "ticket_pieces" => $ticket_pieces
+                "ticket_pieces" => $classes
             ]);
         } catch (\Exception $ex) {
             return $this->errorResponse($ex->getMessage());

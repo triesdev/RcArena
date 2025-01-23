@@ -129,9 +129,10 @@ class EventClassTicketSeeder extends Seeder
                     'class_id' => $class->id,
                     'event_id' => $class->event_id,
 
-                    'name' => "Ticket 1",
+                    'name' => "Ticket {$class->name} 1",
                     'price' => 25000,
                     'quota' => 100,
+                    'quota_left' => 100,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now(),
                     'deleted_at' => null,
@@ -141,9 +142,10 @@ class EventClassTicketSeeder extends Seeder
                     'class_id' => $class->id,
 
                     'event_id' => $class->event_id,
-                    'name' => "Ticket 2",
+                    'name' => "Ticket {$class->name} 2",
                     'price' => 30000,
                     'quota' => 100,
+                    'quota_left' => 100,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now(),
                     'deleted_at' => null,
@@ -153,9 +155,10 @@ class EventClassTicketSeeder extends Seeder
                     'class_id' => $class->id,
 
                     'event_id' => $class->event_id,
-                    'name' => "Ticket 3",
+                    'name' => "Ticket {$class->name} 3",
                     'price' => 20000,
                     'quota' => 100,
+                    'quota_left' => 100,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now(),
                     'deleted_at' => null,
@@ -172,7 +175,7 @@ class EventClassTicketSeeder extends Seeder
         DB::table('ticket_bundles')->insert([
             [
                 'event_id' => $this->event->id,
-                'name' => "Bundle 1",
+                'name' => "Bundle {$this->event->name} 1",
                 'price' => 0,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),

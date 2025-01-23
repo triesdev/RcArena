@@ -34,6 +34,7 @@ class UserRoleSeed extends Seeder
                 'type' => 'cms',
                 'type_mobile' => null,
                 'user_code' => NULL,
+                'api_token' => NULL
             ],
             [
                 'name' => 'Admin',
@@ -43,6 +44,7 @@ class UserRoleSeed extends Seeder
                 'type' => 'cms',
                 'type_mobile' => null,
                 'user_code' => NULL,
+                'api_token' => NULL
             ],
             [
                 'name' => 'Coor 1',
@@ -52,6 +54,7 @@ class UserRoleSeed extends Seeder
                 'type' => 'mobile',
                 'type_mobile' => 'coordinator',
                 'user_code' => '930KKK',
+                'api_token' => '654321'
             ],
             [
                 'name' => 'User 1',
@@ -61,6 +64,7 @@ class UserRoleSeed extends Seeder
                 'type' => 'mobile',
                 'type_mobile' => 'regular',
                 'user_code' => '4930KF',
+                'api_token' => '123456'
             ],
         ];
 
@@ -75,6 +79,7 @@ class UserRoleSeed extends Seeder
                     'user_type' => $item['type'],
                     'user_type_mobile' => $item['type_mobile'],
                     'user_code' => $item['user_code'],
+                    'api_token' => $item['api_token']
                 ]);
             } else {
                 User::create([
@@ -85,6 +90,7 @@ class UserRoleSeed extends Seeder
                     'user_type' => $item['type'],
                     'user_type_mobile' => $item['type_mobile'],
                     'user_code' => $item['user_code'],
+                    'api_token' => $item['api_token']
                 ]);
             }
         }

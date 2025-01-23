@@ -12,6 +12,8 @@ use App\Http\Controllers\Panel\UserController;
 use App\Http\Middleware\ApiToken;
 use App\Http\Middleware\PanelToken;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\TicketController;
+use App\Http\Controllers\API\CartController;
 
 Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () {
     // Auth
@@ -30,7 +32,13 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
     Route::get("events-detail/{id}", [EventController::class, "getEventDetail"]);
 
     // Tickets
+    Route::get('tickets', [TicketController::class, 'getTicketByEventId']);
 
+    // Cart
+    Route::group(['prefix' => 'cart'], function () {
+        Route::post('add-ticket', [CartController::class, 'addToCarts']);
+        Route::get('/', [CartController::class, 'getCarts']);
+    });
 
     Route::resource("roles", RoleController::class);
     Route::resource("menus", MenuController::class);
