@@ -40,6 +40,9 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
         Route::get('/', [CartController::class, 'getCarts']);
     });
 
+    // Transaction
+    Route::resource("transactions", TransactionController::class);
+
     Route::resource("roles", RoleController::class);
     Route::resource("menus", MenuController::class);
     Route::resource("menu-role", MenuRoleController::class);

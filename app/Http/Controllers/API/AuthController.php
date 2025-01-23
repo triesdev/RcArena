@@ -107,7 +107,7 @@ class AuthController extends ApiController
                 $user = User::create([
                     'name' => $name,
                     'email' => $email,
-                    'password' => Hash::make($email),
+                    'password' => Hash::make(rand(100000, 999999)),
                     'image_uri' => $image_uri,
                     'api_token' => StringGenerator::generateAlphanumeric(60)
                 ]);
