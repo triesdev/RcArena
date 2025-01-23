@@ -8,8 +8,7 @@ export default function useAxios() {
         result: null,
     });
 
-    const base_url = '/api/adm/'
-
+    const base_url = '/api/panel/'
     function setHeader() {
         const token = localStorage.getItem('user_token');
         return {

@@ -59,11 +59,10 @@ class PanelAuthController extends PanelController
             return $this->unauthorizedResponse();
         }
 
-
         User::whereEmail($request->email)
             ->first()
             ->update([
-                'api_token' => $new_token
+                'panel_token' => $new_token
             ]);
 
         return $this->successResponse("Success", [

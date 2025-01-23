@@ -49,7 +49,7 @@
                 <div class="menu menu-column menu-rounded menu-sub-indention px-3" id="#kt_app_sidebar_menu"
                     data-kt-menu="true" data-kt-menu-expand="false">
                     <div v-for="menu in sidebar.menu">
-                        <div class="menu-item" v-if="!menu.children && menu.type !== 'title'">
+                        <div class="menu-item" v-if="menu.children.length === 0 && menu.type !== 'title'">
                             <!--begin:Menu link-->
                             <router-link class="menu-link" :to="menu.url">
                                 <span class="menu-icon">
@@ -88,8 +88,6 @@
                             </div>
                         </div>
                     </div>
-
-
                 </div>
             </div>
         </div>
@@ -143,7 +141,7 @@ export default {
         const sidebar = reactive({ menu: {} })
 
         function loadMenu() {
-            getData('menu')
+            getData('menu-tree')
                 .then((data) => {
                     sidebar.menu = data.result
 
@@ -160,7 +158,7 @@ export default {
                 })
         }
 
-        // loadMenu();
+        loadMenu();
 
         onMounted(() => {
             emitter.on("sidebar-update-menu", isOpen => {

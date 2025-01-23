@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Panel\AuthController;
+use App\Http\Controllers\Panel\PanelAuthController;
 
 Route::get('/', function () {
     return "ok";
@@ -13,8 +13,8 @@ Route::get('/dashboard', function () {
 
 require __DIR__.'/auth.php';
 
-Route::get('/panel', [AuthController::class, 'adminPanel']);
-Route::get('/panel/{path}', [AuthController::class, 'adminPanel'])->where('path', '([A-z\d\-\/_.]+)?');
+Route::get('/panel', [PanelAuthController::class, 'adminPanel']);
+Route::get('/panel/{path}', [PanelAuthController::class, 'adminPanel'])->where('path', '([A-z\d\-\/_.]+)?');
 
-Route::get('/auth/{path}', [AuthController::class, 'auth'])
+Route::get('/auth/{path}', [PanelAuthController::class, 'authView'])
     ->where('path', '([A-z\d\-\/_.]+)?');
