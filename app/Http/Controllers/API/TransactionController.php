@@ -19,6 +19,11 @@ class TransactionController extends ApiController
         return $this->successResponse("Success", $data);
     }
 
+    public function show()
+    {
+
+    }
+
     public function store(Request $request)
     {
         $auth_user = $request->auth_user;
