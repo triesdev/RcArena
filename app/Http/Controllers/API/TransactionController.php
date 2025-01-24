@@ -40,7 +40,8 @@ class TransactionController extends ApiController
                 );
         },'transaction_detail_class_groups'])
         ->leftJoin('events', 'transactions.event_id', '=', 'events.id')
-        ->select('transactions.*', 'events.name as event_name')
+        ->select('transactions.*', 'events.name as event_name','payments.payment_proof_image_uri')
+        ->leftJoin('payments', 'transactions.id', '=', 'payments.transaction_id')
         ->find($id);
 
         if (!$transaction) {
@@ -178,6 +179,29 @@ class TransactionController extends ApiController
             DB::rollBack();
             return $this->errorResponse($ex->getMessage());
         }
+    }
+
+    public function getTransactionForPayment($id){
+        $transaction = Transaction::leftJoin("transaction_details","transactions.id","=","transaction_details.transaction_id")->selectRaw(DB::raw(
+            "transactions.id,
+            transactions.user_id,
+            transactions.transaction_number,
+            transactions.transaction_date,
+            transactions.payment_limit_date,
+            transactions.unique_code_price,
+            transactions.total_price,
+            SUM(transaction_details.qty) as total_qty"
+        ))
+        ->with('user', function ($q){
+            $q->select("id","name","email","phone_number");
+        })
+        ->find($id);
+
+        if(!$transaction){
+            return $this->errorResponse("Data not found");
+        }
+
+        return $this->successResponse("Success", $transaction);
     }
 
     private function generateInvoiceNumberTransactions(){

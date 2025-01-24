@@ -32,4 +32,9 @@ class Transaction extends Model
     {
         return $this->leftJoin('events', 'transactions.event_id', '=', 'events.id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, "user_id");
+    }
 }
