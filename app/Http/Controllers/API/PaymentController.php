@@ -30,6 +30,10 @@ class PaymentController extends ApiController
             return $this->errorResponse("Transaction not found");
         }
 
+        if ($transaction->transaction_status != 'unpaid'){
+            return $this->errorResponse("Transaction already paid");
+        }
+
         DB::beginTransaction();
         try {
             $transaction->update([

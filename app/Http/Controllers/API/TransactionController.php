@@ -17,8 +17,35 @@ class TransactionController extends ApiController
 {
     public function index(Request $request)
     {
-        $data = Transaction::paginate($request->per_page ?? 10);
-        return $this->successResponse("Success", $data);
+
+        // QUERY GENERATE
+
+        $transaction = Transaction::leftJoin("transaction_details","transactions.id","=","transaction_details.transaction_id")
+        ->leftJoin('events', 'transactions.event_id', '=', 'events.id')
+        ->selectRaw(DB::raw(
+            "transactions.id,
+            transactions.user_id,
+            transactions.transaction_number,
+            transactions.transaction_date,
+            transactions.payment_limit_date,
+            transactions.unique_code_price,
+            transactions.total_price,
+            transactions.transaction_status,
+            CAST(SUM(transaction_details.qty) AS UNSIGNED) as total_qty,
+            events.name as event_name,
+            events.event_start
+            ",
+        ))->when($request->transaction_status, function ($q) use ($request){
+                return $q->where('transaction_status', $request->transaction_status);
+            })
+            ->when($request->event_id, function ($q) use ($request){
+                return $q->where('event_id', $request->event_id);
+            })
+            ->where("transactions.user_id",$request->auth_user->id)
+            ->limit($request->limit ?? 10)->offset($request->offset ?? 0)
+            ->get();
+
+        return $this->successResponse("Success", $transaction);
     }
 
     public function show($id)
