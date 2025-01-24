@@ -106,6 +106,7 @@ class AuthController extends ApiController
             $user = User::whereEmail($email)->first();
             if (!$user) {
                 $user = User::create([
+                    'user_code' => StringGenerator::generateUserCode(),
                     'name' => $name,
                     'email' => $email,
                     'password' => Hash::make(rand(100000, 999999)),

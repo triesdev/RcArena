@@ -105,4 +105,13 @@ class StringGenerator {
     public static function generateUrlSafe(int $length = 32): string {
         return rtrim(strtr(base64_encode(random_bytes($length)), '+/', '-_'), '=');
     }
+
+    public function generateUserCode(int $length = 6): string {
+        return self::generate($length, [
+            'lowercase' => false,
+            'uppercase' => true,
+            'numbers' => true,
+            'special' => false
+        ]);
+    }
 }
