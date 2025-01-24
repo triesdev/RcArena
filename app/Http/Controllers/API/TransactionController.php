@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\ApiController;
 use App\Models\Cart;
+use App\Models\EventClass;
 use App\Models\GeneralLedger;
 use App\Models\Ticket;
 use App\Models\Transaction;
@@ -22,9 +23,13 @@ class TransactionController extends ApiController
 
     public function show($id)
     {
-        $data = Transaction::leftJoinEventClass()
-            ->leftJoinEvent()
+        $data = Transaction::with(['transaction_details' => function ($q) {
+                return;
+            },'event_classes'])
             ->find($id);
+
+        return $data;
+
         if (!$data) {
             return $this->errorResponse("Data not found");
         }

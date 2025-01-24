@@ -14,6 +14,11 @@ class Transaction extends Model
         return $this->hasMany(TransactionDetail::class, "transaction_id", "id");
     }
 
+    public function event_classes()
+    {
+        return $this->transaction_details()->leftJoin("tickets","ticket_id","=","tickets.id")->groupBy('tickets.class_id');
+    }
+
     public function scopeLeftJoinUser($query){
         return $query->leftJoin("users", "transactions.user_id", "=", "users.id");
     }
