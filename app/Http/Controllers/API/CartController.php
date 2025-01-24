@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\ApiController;
-use App\Http\Controllers\Controller;
 use App\Models\Cart;
+use App\Models\Event;
 use App\Models\Ticket;
 use App\Models\TicketBundle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class CartController extends ApiController
@@ -19,14 +18,25 @@ class CartController extends ApiController
     private $user;
     private $response_ticket;
     private $ticket_stock_check;
+    private $event_id;
     // END ADD TO CART
 
     public function getCarts(Request $request)
     {
 
+        $validator = Validator::make($request->all(), [
+            'event_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse("Errors", $validator->errors());
+        }
+
         try {
             $this->user = $request->auth_user;
-            $carts = Cart::leftJoin("tickets", "carts.ticket_id", "=", "tickets.id")->select("carts.*", "tickets.quota_left")->whereUserId($this->user->id)->get();
+            $event_id = $request->input('event_id');
+            $carts = Cart::leftJoin("tickets", "carts.ticket_id", "=", "tickets.id")
+                ->select("carts.*", "tickets.quota_left")->whereUserId($this->user->id)->where("carts.event_id",$event_id)->get();
 
 
             $carts = $carts->map(function ($cart) {
@@ -59,6 +69,7 @@ class CartController extends ApiController
             })->flatten();
 
             $response = [
+                "events" => Event::select("id as event_id","name as event_name")->find($event_id),
                 "ticket_bundles" => $ticket_bundles,
                 "ticket_pieces" => $carts,
                 "total_cart_price" => $total_cart_price,
@@ -77,7 +88,8 @@ class CartController extends ApiController
 
         $validator = Validator::make($request->all(), [
             'type' => 'required|in:bundle,piece',
-            'id' => 'required',
+            'ticket_id' => 'required',
+            'event_id' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -85,16 +97,17 @@ class CartController extends ApiController
         }
 
         $type = $request->input('type');
-        $id = $request->input('id');
+        $ticket_id = $request->input('ticket_id');
+        $this->event_id = $request->input('event_id');
 
         DB::beginTransaction();
         try {
             $this->response_ticket = [];
             $this->ticket_stock_check = [];
             if ($type == 'bundle') {
-                $this->bundleToCart($id);
+                $this->bundleToCart($ticket_id);
             } else {
-                $this->pieceToCart($id);
+                $this->pieceToCart($ticket_id);
             }
 
             if (count($this->ticket_stock_check) > 0) {
@@ -150,6 +163,7 @@ class CartController extends ApiController
             $cart->price = $ticket->price;
             $cart->qty = 1;
             $cart->total_price = $ticket->price;
+            $cart->event_id = $this->event_id;
             $cart->save();
         }
 

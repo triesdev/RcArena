@@ -10,6 +10,7 @@ use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class TransactionController extends ApiController
 {
@@ -19,14 +20,28 @@ class TransactionController extends ApiController
         return $this->successResponse("Success", $data);
     }
 
-    public function show()
+    public function show($id)
     {
-
+        $data = Transaction::leftJoinEventClass()
+            ->leftJoinEvent()
+            ->find($id);
+        if (!$data) {
+            return $this->errorResponse("Data not found");
+        }
+        return $this->successResponse("Success", $data);
     }
 
     public function store(Request $request)
     {
         $auth_user = $request->auth_user;
+
+        $validator = Validator::make($request->all(), [
+            'event_id' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse("Errors", $validator->errors());
+        }
 
         DB::beginTransaction();
         try {
@@ -36,6 +51,7 @@ class TransactionController extends ApiController
                 ->leftJoin('ticket_bundles', 'carts.ticket_bundle_id', '=', 'ticket_bundles.id')
                 ->leftJoin('tickets', 'carts.ticket_id', '=', 'tickets.id')
                 ->select("carts.*","ticket_bundles.name as ticket_bundle_name","tickets.quota_left")
+                ->where('carts.event_id', $request->event_id)
                 ->get();
 
             if ($carts->count() == 0) {
@@ -63,6 +79,7 @@ class TransactionController extends ApiController
 
             $transaction = new Transaction();
             $transaction->user_id = $auth_user->id;
+            $transaction->event_id = $request->event_id;
             $transaction->user_name = $auth_user->name;
             $transaction->transaction_date = $transaction_date;
             $transaction->transaction_number = $this->generateInvoiceNumberTransactions();
