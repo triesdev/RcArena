@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\ApiController;
+use App\Models\Role;
 use App\Models\User;
 use App\Utils\StringGenerator;
 use Illuminate\Http\Request;
@@ -109,7 +110,8 @@ class AuthController extends ApiController
                     'email' => $email,
                     'password' => Hash::make(rand(100000, 999999)),
                     'image_uri' => $image_uri,
-                    'api_token' => StringGenerator::generateAlphanumeric(60)
+                    'api_token' => StringGenerator::generateAlphanumeric(60),
+                    'role_id' => Role::whereIsDefault(1)->whereType('mobile')->first()->id,
                 ]);
             } else {
                 $user->update([

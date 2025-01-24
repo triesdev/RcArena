@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->string("description")->nullable();
             $table->boolean('is_active')->default(1);
+            $table->boolean('is_default')->default(0);
             $table->enum("type",['cms','mobile']);
             $table->timestamps();
             $table->softDeletes();
