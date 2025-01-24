@@ -23,17 +23,50 @@ class TransactionController extends ApiController
 
     public function show($id)
     {
-        $data = Transaction::with(['transaction_details' => function ($q) {
-                return;
-            },'event_classes'])
-            ->find($id);
 
-        return $data;
+        $transaction = Transaction::with(['transaction_details' => function ($q) {
+            $q->leftJoin('tickets', 'transaction_details.ticket_id', '=', 'tickets.id')
+                ->leftJoin('classes', 'tickets.class_id', '=', 'classes.id')
+                ->select(
+                    'transaction_details.id',
+                    'transaction_details.transaction_id',
+                    'transaction_details.qty',
+                    'transaction_details.price',
+                    'transaction_details.subtotal_price',
+                    'tickets.name as ticket_name',
+                    'classes.name as class_name',
+                    'classes.id as class_id',
 
-        if (!$data) {
+                );
+        },'transaction_detail_class_groups'])
+        ->leftJoin('events', 'transactions.event_id', '=', 'events.id')
+        ->select('transactions.*', 'events.name as event_name')
+        ->find($id);
+
+        if (!$transaction) {
             return $this->errorResponse("Data not found");
         }
-        return $this->successResponse("Success", $data);
+
+        // Convert Data
+        $data = $transaction->transaction_detail_class_groups->map(function ($group) use ($transaction) {
+            $group->transaction_details = $transaction->transaction_details->filter(function ($detail) use ($group) {
+                return $detail->class_id === $group->class_id;
+            })->flatten();
+
+            return $group;
+        });
+
+        //Remove Transaction Detail Class Group
+        unset($transaction->transaction_detail_class_groups);
+        unset($transaction->transaction_details);
+
+        // Change Transaction Details With Converted Data
+        $transaction->transaction_details = $data;
+
+        if (!$transaction) {
+            return $this->errorResponse("Data not found");
+        }
+        return $this->successResponse("Success", $transaction);
     }
 
     public function store(Request $request)
@@ -82,11 +115,15 @@ class TransactionController extends ApiController
             $unique_code_price = rand(100, 500);
             $total_cart_prices = $carts->sum('total_price');
 
+            // Payment Limit Date + 15 menits
+            $payment_limit_date = date('Y-m-d H:i:s', strtotime($transaction_date . ' + 15 minutes'));
+
             $transaction = new Transaction();
             $transaction->user_id = $auth_user->id;
             $transaction->event_id = $request->event_id;
             $transaction->user_name = $auth_user->name;
             $transaction->transaction_date = $transaction_date;
+            $transaction->payment_limit_date = $payment_limit_date;
             $transaction->transaction_number = $this->generateInvoiceNumberTransactions();
             $transaction->unique_code_price = $unique_code_price;
             $transaction->total_price = $total_cart_prices + $unique_code_price;

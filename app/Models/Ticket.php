@@ -12,4 +12,9 @@ class Ticket extends Model
     {
        return $this->leftJoin('classes', 'tickets.class_id', '=', 'classes.id');
     }
+
+    public function event_class()
+    {
+        return $this->belongsTo(EventClass::class, "class_id");
+    }
 }
