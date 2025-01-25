@@ -18,7 +18,7 @@ use App\Http\Controllers\API\PaymentController;
 
 Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () {
     // Auth
-    Route::post("login-sso", [AuthController::class,'SSOLogin'])->withoutMiddleware([ApiToken::class]);
+    Route::post("login-sso", [AuthController::class, 'SSOLogin'])->withoutMiddleware([ApiToken::class]);
     Route::post("login", [AuthController::class, "Login"])->withoutMiddleware([ApiToken::class]);
     Route::post("register", [AuthController::class, "Register"])->withoutMiddleware([ApiToken::class]);
     Route::get("auth", [AuthController::class, "Auth"]);
@@ -47,11 +47,6 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
 
     // Payment
     Route::resource("payments", PaymentController::class);
-
-    Route::resource("roles", RoleController::class);
-    Route::resource("menus", MenuController::class);
-    Route::resource("menu-role", MenuRoleController::class);
-    Route::get("menu-tree", [MenuRoleController::class, "menuTree"]);
 });
 
 Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], function () {
@@ -68,6 +63,7 @@ Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], functio
     Route::resource("transactions", TransactionController::class);
 
     Route::get("menu-tree", [MenuRoleController::class, "menuTree"]);
+    Route::get('roles-list', [RoleController::class, 'list']);
 
     Route::get("report/balance-sheet", [ReportController::class, "balanceSheet"]);
 });

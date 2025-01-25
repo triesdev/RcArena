@@ -24,15 +24,6 @@
                                 <input type="text" class="form-control" placeholder="Cari.."
                                     @keyup.enter="loadDataContent()" v-model="user_store.name">
                             </div>
-                            <div class="col-md-3">
-                                <select class="form-control" @change="loadDataContent()" v-model="user_store.type">
-                                    <option value="">Semua</option>
-                                    <option value="speaker">Speaker</option>
-                                    <option value="admin">Admin</option>
-                                    <option value="user">User</option>
-                                    <option value="reviewer">Reviewer</option>
-                                </select>
-                            </div>
                         </div>
                     </div>
                     <div class="card-body pt-0">
@@ -44,7 +35,7 @@
                                         <tr class="text-start text-gray-400 fw-bold fs-7 text-uppercase gs-0">
                                             <th>No</th>
                                             <th>Nama</th>
-                                            <th>Tipe</th>
+                                            <th>Role</th>
                                             <th class="text-end">Aksi</th>
                                         </tr>
                                     </thead>
@@ -62,7 +53,7 @@
                                                 <div>{{ data.email }}</div>
                                             </td>
                                             <td>
-                                                {{ data.type }}
+                                                {{ data.role_name }}
                                             </td>
                                             <td class="text-end">
                                                 <div class="dropdown">
@@ -75,11 +66,6 @@
                                                             class="dropdown-item">
                                                             Edit
                                                         </router-link>
-                                                        <a target="_blank"
-                                                            :href="'https://jcu.perki-jogja.com/logas?user_id=' + data.id + '&passcode=' + 'JCU23OKE'"
-                                                            class="dropdown-item">
-                                                            Logas
-                                                        </a>
                                                     </div>
                                                 </div>
                                             </td>
@@ -132,7 +118,7 @@ export default {
             getData('users', user_store)
                 .then((data) => {
                     if (data.success) {
-                        response.data_content = data
+                        response.data_content = data.result
                     }
 
                     is_loading.value = false

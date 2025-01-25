@@ -24,12 +24,13 @@ class ApiResponse
         ]);
     }
 
-    public static function error(string $message = 'Error',  $result = null, int $statusCode = 400): \Illuminate\Http\JsonResponse
+    public static function error(string $message = 'Error',  $errors = null, int $statusCode = 400): \Illuminate\Http\JsonResponse
     {
         return response()->json([
             'success' => false,
             'message' => $message,
-            'result' => $result
+            'result' => null,
+            'errors' => $errors
         ], $statusCode);
     }
 

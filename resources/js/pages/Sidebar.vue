@@ -6,13 +6,13 @@
             <router-link to="/panel/dashboard">
                 <div class="app-sidebar-logo-default">
                     <div class="d-flex align-items-center">
-                        <img alt="Logo" src="/assets/logo/jcu_color.png" class="h-35px app-sidebar-logo-default">
+                        <img alt="Logo" src="" class="h-35px app-sidebar-logo-default">
                         <div class="text-white fw-bold ms-3 text-lg">
-                            <span class="text-white">JCU</span> <span class="text-danger">2024</span>
+                            <span class="text-white">Rocket</span> <span class="text-danger">Arena</span>
                         </div>
                     </div>
                 </div>
-                <img alt="Logo" src="/assets/logo/jcu_color.png" class="h-20px app-sidebar-logo-minimize">
+                <img alt="Logo" src="" class="h-20px app-sidebar-logo-minimize">
             </router-link>
             <div id="kt_app_sidebar_toggle"
                 class="app-sidebar-toggle btn btn-icon btn-shadow btn-sm btn-color-muted btn-active-color-primary body-bg h-30px w-30px position-absolute top-50 start-100 translate-middle rotate"

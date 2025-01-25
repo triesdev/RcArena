@@ -12,7 +12,24 @@ class RoleController extends ApiController
 {
     public function index(Request $request)
     {
-        $data = Role::paginate($request->per_page ?? 10);
+        $dataContent = Role::orderByDesc('name');
+        $dataContent = $this->withFilter($dataContent, $request);
+        $dataContent = $dataContent->paginate($request->per_page ?? 20);
+
+        return $this->successResponse("Success", $dataContent);
+    }
+
+    public function withFilter($dataContent, $request)
+    {
+        if ($request->name) {
+            $dataContent = $dataContent->where('name', 'LIKE', '%' . $request->name . '%');
+        }
+        return $dataContent;
+    }
+
+    public function show($id)
+    {
+        $data = Role::find($id);
 
         return $this->successResponse("Success", $data);
     }
@@ -63,5 +80,11 @@ class RoleController extends ApiController
 
         $data->delete();
         return $this->successResponse("Deleted");
+    }
+
+    public function list()
+    {
+        $data = Role::orderBy('name')->get();
+        return $this->successResponse("Success", $data);
     }
 }

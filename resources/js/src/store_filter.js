@@ -38,12 +38,6 @@ export const useFilterStore = defineStore('filter', () => {
         dates: '',
     })
 
-    const transaction_validate_store = reactive({
-        page: 1,
-        per_page: 1,
-        section: 'jcu24',
-    })
-
     const presence_store = reactive({
         event_id: 1,
         page: 1,

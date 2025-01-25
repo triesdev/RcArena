@@ -1,27 +1,28 @@
-import {reactive} from "vue";
+import { reactive } from "vue";
 const state = reactive({
     errors: []
 })
 
-export default function useValidation(){
+export default function useValidation() {
 
-    function getStatus(field){
+    function getStatus(field) {
         const errors = state.errors
         return errors[field] !== undefined
     }
 
-    function getMessage(field){
+    function getMessage(field) {
         const errors = state.errors
-        if(getStatus(field)){
+        if (getStatus(field)) {
             return errors[field][0]
         }
     }
 
-    function setErrors(errors){
+    function setErrors(errors) {
+        console.log("SET ERROR", errors)
         state.errors = errors
     }
 
-    function resetErrors(){
+    function resetErrors() {
         state.errors = []
     }
 

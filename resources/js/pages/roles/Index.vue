@@ -129,7 +129,7 @@ export default {
             getData('roles', filter)
                 .then((data) => {
                     if (data.success) {
-                        response.data_content = data
+                        response.data_content = data.result
                     }
                     is_loading.value = false
                 })

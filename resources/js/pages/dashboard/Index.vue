@@ -126,7 +126,7 @@
                                 <div class="text-lg h4 mb-0">Transactions</div>
                                 <div>
                                     <a class="text-sm text-blue-600 hover:text-blue-400 underline" target="_blank"
-                                        href="/transaction-recap?section=jcu24">Data Detail</a>
+                                        href="/transaction-recap">Data Detail</a>
                                 </div>
                             </div>
                             <div class="row mb-2">

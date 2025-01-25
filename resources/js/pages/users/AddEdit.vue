@@ -11,7 +11,7 @@
         </div>
         <div class="app-content flex-column-fluid">
             <div class="app-container container-xxl">
-                <div class="card card-flush py-4">
+                <div class="card card-flush py-4 mb-4">
                     <div class="card-header">
                         <div class="card-title">
                             <h2>Detail</h2>
@@ -26,26 +26,16 @@
                                     {{ getMessage('name') }}
                                 </div>
                             </div>
-                            <div class="mb-5  col-md-6 fv-row fv-plugins-icon-container">
-                                <label class="form-label">Role</label>
-                                <select class="form-control mb-2" v-model="form.role_id">
-                                    <option :value="role.id" v-for="role in form_props.roles">{{ role.name }}
-                                    </option>
-                                </select>
-                                <div class="fv-plugins-message-container invalid-feedback" v-if="getStatus('role_id')">
-                                    {{ getMessage('role_id') }}
-                                </div>
+                            <div class="mb-5 col-md-6 fv-row fv-plugins-icon-container">
+                                <label class="form-label">User Code</label>
+                                <input type="text" class="form-control mb-2" v-model="form.user_code">
                             </div>
                             <div class="mb-5  col-md-6 fv-row fv-plugins-icon-container">
-                                <label class="form-label">Tipe</label>
-                                <select class="form-control mb-2" v-model="form.type">
-                                    <option value="reviewer">Reviewer</option>
-                                    <option value="speaker">Speaker</option>
-                                    <option value="admin">Admin</option>
-                                    <option value="user">User</option>
-                                </select>
-                                <div class="fv-plugins-message-container invalid-feedback" v-if="getStatus('type')">{{
-                                    getMessage('type') }}
+                                <label class="form-label">No Telepon</label>
+                                <input type="text" class="form-control mb-2" v-model="form.phone_number">
+                                <div class="fv-plugins-message-container invalid-feedback"
+                                    v-if="getStatus('phone_number')">
+                                    {{ getMessage('phone_number') }}
                                 </div>
                             </div>
                             <div class="mb-5 col-md-6 fv-row fv-plugins-icon-container">
@@ -80,41 +70,52 @@
                                     {{ getMessage('password_confirmation') }}
                                 </div>
                             </div>
-                            <div class="mb-5 col-12 fv-row fv-plugins-icon-container">
-                                <label class="form-label">
-                                    Curiculum Vitae
-                                </label>
-                                <ckeditor :editor="editor" v-model="form.biography" :config="editor_data.config">
-                                </ckeditor>
+                            <div class="mb-5  col-md-6 fv-row fv-plugins-icon-container">
+                                <label class="form-label">Tipe Akun</label>
+                                <select class="form-control mb-2" v-model="form.user_type">
+                                    <option value="cms">Admin Panel</option>
+                                    <option value="mobile">Mobile Apps</option>
+                                </select>
+                                <div class="fv-plugins-message-container invalid-feedback"
+                                    v-if="getStatus('user_type')">
+                                    {{ getMessage('user_type') }}
+                                </div>
                             </div>
-                            <div class="mb-5 col-md-6 fv-row fv-plugins-icon-container">
-                                <label class="form-label">Phone</label>
-                                <input type="text" class="form-control mb-2" v-model="form.phone">
+                            <div class="mb-5  col-md-6 fv-row fv-plugins-icon-container">
+                                <div v-if="form.user_type === 'mobile'">
+                                    <label class="form-label">Tipe Mobile Apps</label>
+                                    <select class="form-control mb-2" v-model="form.user_type_mobile">
+                                        <option value="coordinator">Koordinator</option>
+                                        <option value="regular">Regular</option>
+                                    </select>
+                                    <div class="fv-plugins-message-container invalid-feedback"
+                                        v-if="getStatus('user_type_mobile')">
+                                        {{ getMessage('user_type_mobile') }}
+                                    </div>
+                                </div>
                             </div>
-                            <div class="mb-5 col-md-6 fv-row fv-plugins-icon-container">
-                                <label class="form-label">Institusi</label>
-                                <input type="text" class="form-control mb-2" v-model="form.institution">
+                            <div class="mb-5  col-md-6 fv-row fv-plugins-icon-container">
+                                <label class="form-label">Status</label>
+                                <select class="form-control mb-2" v-model="form.is_active">
+                                    <option value="1">Aktif</option>
+                                    <option value="0">Non Aktif</option>
+                                </select>
+                                <div class="fv-plugins-message-container invalid-feedback"
+                                    v-if="getStatus('is_active')">
+                                    {{ getMessage('is_active') }}
+                                </div>
                             </div>
-                            <div class="mb-5 col-md-6 fv-row fv-plugins-icon-container">
-                                <label class="form-label">Kota</label>
-                                <input type="text" class="form-control mb-2" v-model="form.city">
+                            <div class="mb-5  col-md-6 fv-row fv-plugins-icon-container">
+                                <label class="form-label">Role</label>
+                                <select class="form-control mb-2" v-model="form.role_id">
+                                    <option :value="role.id" v-for="role in form_props.roles">{{ role.name }}
+                                    </option>
+                                </select>
+                                <div class="fv-plugins-message-container invalid-feedback" v-if="getStatus('role_id')">
+                                    {{ getMessage('role_id') }}
+                                </div>
                             </div>
-                            <div class="mb-5 col-md-6 fv-row fv-plugins-icon-container">
-                                <label class="form-label">Provinsi</label>
-                                <input type="text" class="form-control mb-2" v-model="form.province">
-                            </div>
-                            <div class="mb-5 col-md-6 fv-row fv-plugins-icon-container">
-                                <label class="form-label">Pekerjaan</label>
-                                <input type="text" class="form-control mb-2" v-model="form.job_type_code">
-                            </div>
-                            <div class="mb-5 col-md-6 fv-row fv-plugins-icon-container">
-                                <label class="form-label">Deskripsi</label>
-                                <input type="text" class="form-control mb-2" v-model="form.desc">
-                            </div>
-                            <div class="mb-5 col-md-6 fv-row fv-plugins-icon-container">
-                                <label class="form-label">Slug</label>
-                                <input type="text" class="form-control mb-2" v-model="form.slug">
-                            </div>
+                            <!-- image_uri: '', -->
                         </div>
                     </div>
                 </div>
@@ -169,8 +170,8 @@ export default {
         const param_id = route.params.id
         form_props.edit_mode = param_id !== 'add'
 
-        const title = form_props.edit_mode ? "Edit Staff" : "Tambah Staff"
-        const breadcrumb_list = ["Klien", form_props.edit_mode ? "Edit" : "Tambah"];
+        const title = form_props.edit_mode ? "Edit User" : "Tambah User"
+        const breadcrumb_list = ["User", form_props.edit_mode ? "Edit" : "Tambah"];
 
         const editor = ClassicEditor
         const editor_data = reactive({
@@ -179,44 +180,32 @@ export default {
 
         const form = reactive({
             id: '',
-            status: 100,
             name: '',
+            user_code: '',
+            phone_number: '',
             email: '',
             password: '',
             password_confirmation: '',
-            type: '',
-            biography: '',
-            phone: '',
-            institution: '',
-            city: '',
-            province: '',
-            job_type_code: '',
-            image: '',
-            desc: '',
-            slug: '',
-            identity_photo: '',
+            user_type: '',
+            user_type_mobile: '',
+            is_active: '',
             role_id: '',
+            image_uri: '',
         })
 
         if (form_props.edit_mode) {
             getData('users/' + param_id)
                 .then((data) => {
                     form.id = data.result.id
-                    form.status = data.result.status
                     form.name = data.result.name
+                    form.user_code = data.result.user_code
+                    form.phone_number = data.result.phone_number
                     form.email = data.result.email
-                    form.type = data.result.type
-                    form.biography = data.result.biography ?? ''
-                    form.phone = data.result.phone
-                    form.institution = data.result.institution
-                    form.city = data.result.city
-                    form.province = data.result.province
-                    form.job_type_code = data.result.job_type_code
-                    form.image = data.result.image
-                    form.desc = data.result.desc
+                    form.user_type = data.result.user_type
+                    form.user_type_mobile = data.result.user_type_mobile
+                    form.is_active = data.result.is_active
                     form.role_id = data.result.role_id
-                    form.slug = data.result.slug
-                    form.identity_photo = data.result.identity_photo
+                    form.image_uri = data.result.image_uri
                 })
         }
 
@@ -228,6 +217,7 @@ export default {
                     router.push('/panel/users')
                     resetErrors()
                 } else {
+                    console.log("Disini", data)
                     setErrors(data.errors)
                 }
             })

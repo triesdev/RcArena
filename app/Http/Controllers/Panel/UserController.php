@@ -12,11 +12,13 @@ class UserController extends ApiController
     public function index(Request $request)
     {
         $data = User::when($request->role_id, function ($query) use ($request) {
-                $query->where('role_id', $request->role_id);
-            })
+            $query->where('role_id', $request->role_id);
+        })
             ->when($request->name, function ($query) use ($request) {
-                $query->where('name', 'like', '%' . $request->name . '%');
+                $query->where('users.name', 'like', '%' . $request->name . '%');
             })
+            ->join('roles', 'users.role_id', '=', 'roles.id')
+            ->select('users.*', 'roles.name as role_name')
             ->paginate($request->per_page ?? 10);
 
         return $this->successResponse("Success", $data);
@@ -35,10 +37,18 @@ class UserController extends ApiController
             return $this->validationErrorResponse($validator->errors()->first(), $validator->errors());
         }
 
-        $data = User::create($request->all());
+        $request->merge(['password' => bcrypt($request->password)]);
+        $data = User::create($request->except("password_confirmation", "auth_user"));
 
         return $this->successResponse("Success", $data);
     }
+
+    public function show($id)
+    {
+        $data = User::find($id);
+        return $this->successResponse("Success", $data);
+    }
+
 
     public function update($id, Request $request)
     {
@@ -60,7 +70,6 @@ class UserController extends ApiController
         $data->update([
             'name' => $request->name,
             'phone_number' => $request->phone_number,
-            'image_uri' => null,
         ]);
 
         return $this->successResponse("Success", $data);
@@ -80,14 +89,14 @@ class UserController extends ApiController
         }
     }
 
-//    public function show($id, Request $request)
-//    {
-//        $data = User::find($request->auth_user->id);
-//
-//        if (!$data) {
-//            return $this->notFoundResponse();
-//        }
-//
-//        return $this->successResponse("Success", $data);
-//    }
+    //    public function show($id, Request $request)
+    //    {
+    //        $data = User::find($request->auth_user->id);
+    //
+    //        if (!$data) {
+    //            return $this->notFoundResponse();
+    //        }
+    //
+    //        return $this->successResponse("Success", $data);
+    //    }
 }
