@@ -45,6 +45,14 @@
                         <br>
                         <input type="email" name="member_email" class="form-control" placeholder="Email">
                     </div>
+                    <div class="mb-3">
+                        <label>Tipe Penghapusan</label>
+                        <br>
+                        <select class="form-control">
+                            <option value="sementara">Sementara</option>
+                            <option value="permanen">Permanen</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <button type="button" onclick="confirmDelete(this)" class="btn btn-primary">Submit</button>
                     </div>
