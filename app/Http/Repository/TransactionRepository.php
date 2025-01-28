@@ -5,7 +5,7 @@ use App\Models\Transaction;
 
 class TransactionRepository
 {
-    public function getDetailTransactionById($id)
+    public function getDetailTransactionById($id, $panel = false)
     {
         $transaction = Transaction::with(['transaction_details' => function ($q) {
             $q->leftJoin('tickets', 'transaction_details.ticket_id', '=', 'tickets.id')
@@ -23,8 +23,13 @@ class TransactionRepository
         },'transaction_detail_class_groups'])
             ->leftJoin('events', 'transactions.event_id', '=', 'events.id')
             ->select('transactions.*', 'events.name as event_name','payments.payment_proof_image_uri')
-            ->leftJoin('payments', 'transactions.id', '=', 'payments.transaction_id')
-            ->find($id);
+            ->leftJoin('payments', 'transactions.id', '=', 'payments.transaction_id');
+        if ($panel) {
+            $transaction = $transaction->with('user');
+            $transaction = $transaction->with('payment');
+        }
+
+        $transaction = $transaction->find($id);
 
         if (!$transaction) {
             return $this->errorResponse("Data not found");

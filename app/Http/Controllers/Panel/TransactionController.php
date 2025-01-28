@@ -58,7 +58,7 @@ class TransactionController extends ApiController
     public function show($id)
     {
         $repo = new TransactionRepository();
-        $transaction = $repo->getDetailTransactionById($id);
+        $transaction = $repo->getDetailTransactionById($id, true);
 
         if (!$transaction) {
             return $this->errorResponse("Data not found");
