@@ -13,6 +13,11 @@ Route::get('/dashboard', function () {
 
 require __DIR__.'/auth.php';
 
+// Privacy Policy
+Route::get('/privacy-policy', function () {
+    return view('privacy-policy');
+});
+
 Route::get('/panel', [PanelAuthController::class, 'adminPanel']);
 Route::get('/panel/{path}', [PanelAuthController::class, 'adminPanel'])->where('path', '([A-z\d\-\/_.]+)?');
 

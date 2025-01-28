@@ -1,25 +1,25 @@
 import { OhVueIcon, addIcons } from "oh-vue-icons";
 import {
-  BiArchive,
-  BiArrowLeft,
-  BiBezier2,
-  BiBookmarkStar,
-  BiCameraVideo,
-  BiCheck2All,
-  BiColumnsGap,
-  BiCursor,
-  BiFilePost,
-  BiFileEarmarkPost,
-  BiGear,
-  BiListCheck,
-  BiMenuButtonWide,
-  BiNewspaper,
-  BiPeople,
-  BiSearch,
-  BiShieldCheck,
-  BiTags,
-  BiVectorPen,
-
+    BiArchive,
+    BiArrowLeft,
+    BiBezier2,
+    BiBookmarkStar,
+    BiCameraVideo,
+    BiCheck2All,
+    BiColumnsGap,
+    BiCursor,
+    BiFilePost,
+    BiFileEarmarkPost,
+    BiGear,
+    BiListCheck,
+    BiMenuButtonWide,
+    BiNewspaper,
+    BiPeople,
+    BiSearch,
+    BiShieldCheck,
+    BiTags,
+    BiVectorPen,
+    BiEye, BiWhatsapp,
 } from "oh-vue-icons/icons/bi";
 
 addIcons(
@@ -42,6 +42,8 @@ addIcons(
   BiShieldCheck,
   BiTags,
   BiVectorPen,
+  BiEye,
+    BiWhatsapp
 );
 
 // register components

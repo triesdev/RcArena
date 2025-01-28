@@ -17,6 +17,7 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import Transactions from "../pages/transactions/Index.vue";
 import TransactionsValidate from "../pages/transactions/Validate.vue";
 import TransactionsAddEdit from "../pages/transactions/AddEdit.vue";
+import TransactionsDetail from "../pages/transactions/Detail.vue";
 
 const routes = [
     {
@@ -36,6 +37,8 @@ const routes = [
             { path: 'profile', component: Profile, meta: { protected: true, title: "Profile" } },
 
             { path: 'transactions/:id', component: TransactionsAddEdit, meta: { protected: true, title: "Post" } },
+            // Transaction Details
+            { path: 'transaction-detail/:id', component: TransactionsDetail, meta: { protected: true, title: "Transaction Detail" } },
 
             { path: 'transactions', component: Transactions, meta: { protected: true, title: "Transactions" } },
             { path: 'transactions-validate/:id', component: TransactionsValidate, meta: { protected: true, title: "Transactions Validate" } },

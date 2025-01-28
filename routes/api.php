@@ -16,6 +16,9 @@ use App\Http\Controllers\API\TicketController;
 use App\Http\Controllers\API\CartController;
 use App\Http\Controllers\API\PaymentController;
 
+// Panel
+use App\Http\Controllers\Panel\TransactionController as PanelTransactionController;
+
 Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () {
     // Auth
     Route::post("login-sso", [AuthController::class, 'SSOLogin'])->withoutMiddleware([ApiToken::class]);
@@ -60,7 +63,7 @@ Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], functio
     Route::resource("roles", RoleController::class);
     Route::resource("menus", MenuController::class);
     Route::resource("menu-role", MenuRoleController::class);
-    Route::resource("transactions", TransactionController::class);
+    Route::resource("transactions", PanelTransactionController::class);
 
     Route::get("menu-tree", [MenuRoleController::class, "menuTree"]);
     Route::get('roles-list', [RoleController::class, 'list']);

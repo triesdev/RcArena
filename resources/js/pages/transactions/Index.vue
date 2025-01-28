@@ -27,11 +27,10 @@
                                 <select class="form-control" @change="loadDataContent()"
                                     v-model="transaction_store.status">
                                     <option value="">Semua</option>
-                                    <option value="100">Select Event</option>
-                                    <option value="110">Waiting Payment</option>
-                                    <option value="120">Waiting Confirmation</option>
-                                    <option value="200">Paid</option>
-                                    <option value="400">Deleted</option>
+                                    <option value="unpaid">Belum Bayar</option>
+                                    <option value="process">Proses</option>
+                                    <option value="success">Sudah Bayar</option>
+                                    <option value="reject">Batal</option>
                                 </select>
                             </div>
                         </div>
@@ -44,10 +43,13 @@
                                     <thead>
                                         <tr class="text-start text-gray-400 fw-bold fs-7 text-uppercase gs-0">
                                             <th>No</th>
-                                            <th>Transaction</th>
-                                            <th>Nama</th>
-                                            <th>Status</th>
-                                            <th class="text-end">Aksi</th>
+                                            <th width="10%">ID Transaksi</th>
+                                            <th width="25%">Pemesan</th>
+                                            <th>Event</th>
+                                            <th>Tiket</th>
+                                            <th>Nominal</th>
+                                            <th width="5%">Status</th>
+                                            <th width="12%" class="text-end">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody class="fw-semibold text-gray-600">
@@ -60,58 +62,47 @@
                                                     - 1) + d + 1 }}
                                             </td>
                                             <td>
-                                                {{ data.number }}
-                                                <div class="text-sm">{{ $filter.formatDateTime(data.created_at) }}
+                                                {{ data.transaction_number }}
+                                                <div class="text-sm">{{ $filter.formatDateTime(data.transaction_date) }}
                                                 </div>
                                             </td>
                                             <td>
-                                                <div class="border-b pb-1 mb-1"
-                                                    v-if="data.user && data.user.email !== data.user_email">
-                                                    <span>{{ data.user.job_type_code }}</span> <b>{{ data.user.name
-                                                        }}</b>
-                                                    <br>
-                                                    <span>{{ data.user.email }}</span>
-                                                    <br>
-                                                    <a class="text-blue-800 hover:text-blue-700"
-                                                        :href="'https://wa.me/' + data.user.phone">{{ data.user.phone
-                                                        }}</a>
-                                                </div>
-                                                <div>
-                                                    {{ data.job_type_code }} <b>{{ data.user_name }}</b>
-                                                    <br>
-                                                    <span>{{ data.user_email }}</span>
-                                                    <br>
-                                                    <a class="text-blue-800 hover:text-blue-700"
-                                                        :href="'https://wa.me/' + data.user_phone">{{ data.user_phone
-                                                        }}</a>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                {{ data.status_label }}
-                                                <div v-if="data.total" class="text-sm">Rp {{
-                                                    $filter.currency(data.total) }}</div>
-                                            </td>
-                                            <td class="text-end">
-                                                <div class="dropdown">
-                                                    <button class="btn btn-light dropdown-toggle btn-sm"
-                                                        data-toggle="dropdown">
-                                                        Aksi
-                                                    </button>
-                                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                                        <router-link :to="'/panel/transactions/' + data.id"
-                                                            class="dropdown-item">
-                                                            Process
-                                                        </router-link>
-                                                        <router-link :to="'/panel/transactions-validate/' + data.id"
-                                                            class="dropdown-item">
-                                                            Validate
-                                                        </router-link>
-                                                        <button class="dropdown-item text-danger"
-                                                            @click="notifWa(data.id)">
-                                                            Message
-                                                        </button>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="mr-4">
+                                                        <img :src="data.user.image_uri ?? '/assets/default-profile.jpg'" alt="User Image" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;" />
+                                                    </div>
+                                                    <div
+                                                        v-if="data.user && data.user.email !== data.user_email">
+                                                        <span>{{ data.user.job_type_code }}</span> <b>{{ data.user.name
+                                                            }}</b>
+                                                        <br>
+                                                        <span>{{ data.user.phone_number }}</span>
+                                                        <br>
                                                     </div>
                                                 </div>
+                                            </td>
+                                            <td>
+                                                {{data.event_name}}
+                                            </td>
+                                            <td>
+                                                {{data.total_qty}}
+                                            </td>
+                                            <td>
+                                                <div v-if="data.total_price" class="text-sm">Rp {{
+                                                        $filter.currency(data.total_price) }}</div>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-info">{{ data.transaction_status.toUpperCase() }}</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <router-link :to="`/panel/transaction-detail/${data.id}`"
+                                                    class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
+                                                    <v-icon name="bi-eye"></v-icon>
+                                                </router-link>
+                                                <button @click="notifWa(data.id)"
+                                                    class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
+                                                    <v-icon name="bi-whatsapp"></v-icon>
+                                                </button>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -156,18 +147,17 @@ export default {
         const is_loading = ref(true)
         const { transaction_store, date_config } = useFilterStore()
 
-        function notifWa(trx_id) {
-            if (confirm("Send Notif?")) {
-                getData('transaction-notify/' + trx_id)
-            }
+        function notifWa(phone_number) {
+           // Redirect To Wa Message
         }
 
         function loadDataContent(page = 1) {
             is_loading.value = true
             transaction_store.page = page
+            console.log('call Load')
 
             getData('transactions', transaction_store).then((data) => {
-                response.data_content = data
+                response.data_content = data.result
                 is_loading.value = false
             }).catch(() => {
                 is_loading.value = false
@@ -198,6 +188,10 @@ export default {
             }
         }
 
+        function setDefaultImage(event) {
+            event.target.src = '/assets/default-profile.jpg';
+        }
+
         return {
             breadcrumb_list,
             title,
@@ -208,7 +202,8 @@ export default {
             changePerPage,
             deleteModal,
             date_config,
-            notifWa
+            notifWa,
+            setDefaultImage
         }
     }
 }

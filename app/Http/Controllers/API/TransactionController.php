@@ -4,8 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\ApiController;
 use App\Models\Cart;
-use App\Models\EventClass;
-use App\Models\GeneralLedger;
+use App\Http\Repository\TransactionRepository;
 use App\Models\Ticket;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
@@ -50,46 +49,8 @@ class TransactionController extends ApiController
 
     public function show($id)
     {
-
-        $transaction = Transaction::with(['transaction_details' => function ($q) {
-            $q->leftJoin('tickets', 'transaction_details.ticket_id', '=', 'tickets.id')
-                ->leftJoin('classes', 'tickets.class_id', '=', 'classes.id')
-                ->select(
-                    'transaction_details.id',
-                    'transaction_details.transaction_id',
-                    'transaction_details.qty',
-                    'transaction_details.price',
-                    'transaction_details.subtotal_price',
-                    'tickets.name as ticket_name',
-                    'classes.name as class_name',
-                    'classes.id as class_id',
-
-                );
-        },'transaction_detail_class_groups'])
-        ->leftJoin('events', 'transactions.event_id', '=', 'events.id')
-        ->select('transactions.*', 'events.name as event_name','payments.payment_proof_image_uri')
-        ->leftJoin('payments', 'transactions.id', '=', 'payments.transaction_id')
-        ->find($id);
-
-        if (!$transaction) {
-            return $this->errorResponse("Data not found");
-        }
-
-        // Convert Data
-        $data = $transaction->transaction_detail_class_groups->map(function ($group) use ($transaction) {
-            $group->transaction_details = $transaction->transaction_details->filter(function ($detail) use ($group) {
-                return $detail->class_id === $group->class_id;
-            })->flatten();
-
-            return $group;
-        });
-
-        //Remove Transaction Detail Class Group
-        unset($transaction->transaction_detail_class_groups);
-        unset($transaction->transaction_details);
-
-        // Change Transaction Details With Converted Data
-        $transaction->transaction_details = $data;
+        $repo = new TransactionRepository();
+        $transaction = $repo->getDetailTransactionById($id);
 
         if (!$transaction) {
             return $this->errorResponse("Data not found");
