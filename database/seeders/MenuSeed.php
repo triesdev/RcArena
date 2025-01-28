@@ -112,12 +112,6 @@ class MenuSeed extends Seeder
                 'type'     => "menu",
                 'children' => [
                     [
-                        'title' => "Tambah Baru",
-                        'icon'  => "",
-                        'url'   => "/panel/menus/add",
-                        'type'  => "submenu",
-                    ],
-                    [
                         'title' => "Data",
                         'icon'  => "",
                         'url'   => "/panel/menus",

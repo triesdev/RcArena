@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\TicketController;
 use App\Http\Controllers\API\CartController;
 use App\Http\Controllers\API\PaymentController;
+use App\Http\Controllers\Panel\EventController as PanelEventController;
+use App\Http\Controllers\Panel\FirebaseController;
 
 Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () {
     // Auth
@@ -61,9 +63,14 @@ Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], functio
     Route::resource("menus", MenuController::class);
     Route::resource("menu-role", MenuRoleController::class);
     Route::resource("transactions", TransactionController::class);
+    Route::resource("events", PanelEventController::class);
 
     Route::get("menu-tree", [MenuRoleController::class, "menuTree"]);
+    Route::post("update-menu-role", [MenuRoleController::class, "update"]);
     Route::get('roles-list', [RoleController::class, 'list']);
+    Route::get('menus-list', [MenuController::class, 'list']);
 
     Route::get("report/balance-sheet", [ReportController::class, "balanceSheet"]);
+
+    Route::get("firebase-config", [FirebaseController::class, "loadConfig"]);
 });

@@ -12,7 +12,7 @@ class MenuRoleController extends ApiController
 {
     public function index(Request $request)
     {
-        $data = Menu::orderBy('order')->get();
+        $data = Menu::orderBy('order')->whereIn('type', ['menu', 'submenu'])->get();
         $menu_role = MenuRole::where('role_id', $request->role_id)
             ->get();
 
@@ -24,7 +24,9 @@ class MenuRoleController extends ApiController
             $item['del'] = $menu_role->where('menu_id', $item->id)->where('method', 'DEL')->first();
         }
 
-        return $this->successResponse("Success", $data);
+        $tree = $this->buildTree($data);
+
+        return $this->successResponse("Success", $tree);
     }
 
     public function store(Request $request)
@@ -64,6 +66,13 @@ class MenuRoleController extends ApiController
         $menu = Menu::orderBy('order')->whereIn('id', $menu_ids)->get();
 
         // build tree
+        $tree = $this->buildTree($menu);
+
+        return $this->successResponse("Successs", $tree);
+    }
+
+    private function buildTree($menu)
+    {
         $tree = [];
         foreach ($menu as $item) {
             if (!$item->parent_id) {
@@ -71,7 +80,41 @@ class MenuRoleController extends ApiController
                 $tree[] = $item;
             }
         }
+        return $tree;
+    }
 
-        return $this->successResponse("Successs", $tree);
+    public function update(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'menu_id' => 'required',
+            'role_id' => 'required',
+            'method_access' => 'required|in:GET,SHOW,POST,PUT,DEL',
+            'action' => 'required|in:add,delete',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationErrorResponse($validator->errors()->first(), $validator->errors());
+        }
+
+        if ($request->action == 'add') {
+            $menu_role = MenuRole::where('menu_id', $request->menu_id)->where('role_id', $request->role_id)->where('method', $request->method_access)->first();
+            if ($menu_role) {
+                return $this->successResponse("Success");
+            } else {
+                MenuRole::create([
+                    'menu_id' => $request->menu_id,
+                    'role_id' => $request->role_id,
+                    'method' => $request->method_access,
+                ]);
+                return $this->successResponse("Success");
+            }
+        }
+
+        if ($request->action == 'delete') {
+            MenuRole::where('menu_id', $request->menu_id)->where('role_id', $request->role_id)->where('method', $request->method_access)->delete();
+            return $this->successResponse("Success");
+        }
+
+        return $this->successResponse("Success");
     }
 }

@@ -39,9 +39,8 @@ class MenuController extends ApiController
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'url' => 'required',
             'title' => 'required',
+            'url' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -59,6 +58,12 @@ class MenuController extends ApiController
         return $this->successResponse("Success", $data);
     }
 
+    public function show($id)
+    {
+        $data = Menu::find($id);
+        return $this->successResponse("Success", $data);
+    }
+
     public function destroy($id)
     {
         $data = Menu::find($id);
@@ -69,5 +74,17 @@ class MenuController extends ApiController
 
         $data->delete();
         return $this->successResponse("Deleted");
+    }
+
+    public function list(Request $request)
+    {
+        $data = Menu::orderBy('title')
+            ->when($request->type, function ($q) use ($request) {
+                if ($request->type == 'menu') {
+                    $q->where('parent_id', null);
+                }
+            })->get();
+
+        return $this->successResponse("Success", $data);
     }
 }

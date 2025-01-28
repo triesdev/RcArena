@@ -18,6 +18,9 @@ import Transactions from "../pages/transactions/Index.vue";
 import TransactionsValidate from "../pages/transactions/Validate.vue";
 import TransactionsAddEdit from "../pages/transactions/AddEdit.vue";
 
+import Event from "../pages/events/Index.vue";
+import EventAddEdit from "../pages/events/AddEdit.vue";
+
 const routes = [
     {
         path: "/panel",
@@ -36,18 +39,11 @@ const routes = [
             { path: 'profile', component: Profile, meta: { protected: true, title: "Profile" } },
 
             { path: 'transactions/:id', component: TransactionsAddEdit, meta: { protected: true, title: "Post" } },
-
             { path: 'transactions', component: Transactions, meta: { protected: true, title: "Transactions" } },
             { path: 'transactions-validate/:id', component: TransactionsValidate, meta: { protected: true, title: "Transactions Validate" } },
-            { path: 'archived-transactions', component: Dashboard, meta: { protected: true, title: "Transactions" } },
-            { path: 'pages', component: Dashboard, meta: { protected: true, title: "Transactions" } },
-            { path: 'pages/:id', component: Dashboard, meta: { protected: true, title: "Transactions" } },
-            { path: 'posts', component: Dashboard, meta: { protected: true, title: "Transactions" } },
-            { path: 'archived-posts', component: Dashboard, meta: { protected: true, title: "Transactions" } },
-            { path: 'events', component: Dashboard, meta: { protected: true, title: "Transactions" } },
-            { path: 'events/:id', component: Dashboard, meta: { protected: true, title: "Event" } },
-            { path: 'settings', component: Dashboard, meta: { protected: true, title: "Transactions" } },
-            { path: 'settings/:id', component: Dashboard, meta: { protected: true, title: "Transactions" } },
+
+            { path: 'events', component: Event, meta: { protected: true, title: "Events" } },
+            { path: 'events/:id', component: EventAddEdit, meta: { protected: true, title: "Event Update" } },
         ]
     },
     { path: "/auth/404", name: "not-found", component: NotFound },
