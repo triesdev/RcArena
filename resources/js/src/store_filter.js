@@ -55,10 +55,10 @@ export const useFilterStore = defineStore('filter', () => {
         category: '',
     })
 
-    const voucher_store = reactive({
+    const event_store = reactive({
         page: 1,
         per_page: 25,
-        year: '2024',
+        name: '',
     })
 
     const user_store = reactive({
@@ -86,7 +86,7 @@ export const useFilterStore = defineStore('filter', () => {
         app_store,
         config_ctk,
         transaction_store,
-        voucher_store,
+        event_store,
         user_store,
         date_config,
         presence_store,

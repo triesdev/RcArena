@@ -9,9 +9,9 @@
                     <Breadcrumb :list="breadcrumb_list"></Breadcrumb>
                 </div>
                 <div class="d-flex align-items-center gap-2 gap-lg-3">
-                    <!-- <router-link to="/panel/menus/add" class="btn btn-sm fw-bold btn-primary">
+                    <router-link to="/panel/events/add" class="btn btn-sm fw-bold btn-primary">
                         Tambah Data
-                    </router-link> -->
+                    </router-link>
                 </div>
             </div>
         </div>
@@ -25,7 +25,7 @@
                                 <span class="svg-icon svg-icon-1 position-absolute ms-4">
                                     <v-icon name="bi-search" />
                                 </span>
-                                <input type="text" v-model="filter.title" @keyup.enter="loadDataContent"
+                                <input type="text" v-model="event_store.name" @keyup.enter="loadDataContent"
                                     class="form-control form-control-solid w-250px ps-14" placeholder="Cari..">
                             </div>
                         </div>
@@ -41,28 +41,20 @@
                                     <thead>
                                         <tr class="text-start text-gray-400 fw-bold fs-7 text-uppercase gs-0">
                                             <th>No</th>
-                                            <th>Judul</th>
-                                            <th>Url</th>
-                                            <th>Icon</th>
-                                            <th>Status</th>
+                                            <th>Nama</th>
                                             <th class="text-end">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody class="fw-semibold text-gray-600">
                                         <tr v-if="response.data_content.total === 0">
-                                            <td colspan="6" class="text-center"><i>Tidak ada data.</i></td>
+                                            <td colspan="5" class="text-center"><i>Tidak ada data.</i></td>
                                         </tr>
                                         <tr v-for="(data, d) in response.data_content.data">
                                             <td>
                                                 {{ response.data_content.per_page *
                                                     (response.data_content.current_page - 1) + d + 1 }}
                                             </td>
-                                            <td>{{ data.title }}</td>
-                                            <td>{{ data.url }}</td>
-                                            <td>{{ data.icon }}</td>
-                                            <td>
-                                                <StatusDefault :status="data.status" />
-                                            </td>
+                                            <td>{{ data.name }}</td>
                                             <td class="text-end">
                                                 <div class="dropdown">
                                                     <button class="btn btn-light dropdown-toggle btn-sm"
@@ -70,7 +62,7 @@
                                                         Aksi
                                                     </button>
                                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                                        <router-link :to="'/panel/menus/' + data.id"
+                                                        <router-link :to="'/panel/events/' + data.id"
                                                             class="dropdown-item">
                                                             Edit
                                                         </router-link>
@@ -88,7 +80,7 @@
                             <div class="row">
                                 <div
                                     class="col-sm-12 col-md-5 d-flex align-items-center justify-content-center justify-content-md-start">
-                                    <PerPage :value="filter.per_page" @change-per-page="changePerPage" />
+                                    <PerPage :value="event_store.per_page" @change-per-page="changePerPage" />
                                 </div>
                                 <div
                                     class="col-sm-12 col-md-7 d-flex align-items-center justify-content-center justify-content-md-end">
@@ -118,21 +110,17 @@ import { useFilterStore } from "../../src/store_filter";
 export default {
     components: { Breadcrumb, PerPage, WidgetContainerModal: container, StatusDefault },
     setup() {
-        const title = "Data Menu"
-        const breadcrumb_list = ["Menu", "Data"];
+        const title = "Data Event"
+        const breadcrumb_list = ["Event", "Data"];
         const { getData, deleteData } = useAxios()
         const is_loading = ref(true)
-
-        const filter = reactive({
-            page: 1,
-            title: '',
-            per_page: 25,
-        })
+        const { event_store } = useFilterStore()
 
         function loadDataContent(page = 1) {
             is_loading.value = true
-            filter.page = page
-            getData('menus', filter)
+            event_store.page = page
+
+            getData('events', event_store)
                 .then((data) => {
                     if (data.success) {
                         response.data_content = data.result
@@ -141,7 +129,7 @@ export default {
                 })
         }
 
-        loadDataContent()
+        loadDataContent(event_store.page)
 
         const response = reactive({
             data_content: {
@@ -150,17 +138,17 @@ export default {
         })
 
         function changePerPage(per_page) {
-            filter.per_page = per_page
+            event_store.per_page = per_page
             loadDataContent()
         }
 
         async function deleteModal(id) {
             const delete_modal = await promptModal(DeleteModal, { title: "Hapus data?" })
             if (delete_modal) {
-                deleteData('menus/' + id)
+                deleteData('events/' + id)
                     .then((data) => {
                         SwalToast('Berhasil menghapus data.')
-                        loadDataContent(filter.page)
+                        loadDataContent(event_store.page)
                     })
             }
         }
@@ -169,8 +157,8 @@ export default {
             breadcrumb_list,
             title,
             response,
-            filter,
             is_loading,
+            event_store,
             loadDataContent,
             changePerPage,
             deleteModal

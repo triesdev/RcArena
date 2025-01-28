@@ -20,12 +20,13 @@
                                 </div>
                             </div>
                             <div class="card-body pt-0">
-                                <select class="form-select mb-2" v-model="form.status">
+                                <select class="form-select mb-2" v-model="form.is_active">
                                     <option value="1">Aktif</option>
                                     <option value="0">Non Aktif</option>
                                 </select>
-                                <div class="fv-plugins-message-container invalid-feedback" v-if="getStatus('status')">
-                                    {{ getMessage('status') }}
+                                <div class="fv-plugins-message-container invalid-feedback"
+                                    v-if="getStatus('is_active')">
+                                    {{ getMessage('is_active') }}
                                 </div>
                             </div>
                         </div>
@@ -144,7 +145,7 @@ export default {
             title: '',
             url: '',
             icon: '',
-            status: 1,
+            is_active: 1,
             order: 1,
         })
 
@@ -156,7 +157,7 @@ export default {
                     form.title = data.result.title
                     form.url = data.result.url
                     form.icon = data.result.icon
-                    form.status = data.result.status
+                    form.is_active = data.result.is_active
                     form.order = data.result.order
                 })
         }
@@ -188,7 +189,7 @@ export default {
         }
 
         function loadMenus() {
-            getData('menus-list', { type: 'main' })
+            getData('menus-list', { type: 'menu' })
                 .then((data) => {
                     form_props.menus = data.result
                 })
