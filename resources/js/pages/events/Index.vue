@@ -41,7 +41,9 @@
                                     <thead>
                                         <tr class="text-start text-gray-400 fw-bold fs-7 text-uppercase gs-0">
                                             <th>No</th>
+                                            <th style="width: 90px;"></th>
                                             <th>Nama</th>
+                                            <th>Tanggal</th>
                                             <th class="text-end">Aksi</th>
                                         </tr>
                                     </thead>
@@ -54,7 +56,12 @@
                                                 {{ response.data_content.per_page *
                                                     (response.data_content.current_page - 1) + d + 1 }}
                                             </td>
+                                            <td>
+                                                <div :style="'background-image: url(' + data.image_uri + ')'"
+                                                    class="img-thumbnail"></div>
+                                            </td>
                                             <td>{{ data.name }}</td>
+                                            <td>{{ $filter.formatDate(data.event_date) }}</td>
                                             <td class="text-end">
                                                 <div class="dropdown">
                                                     <button class="btn btn-light dropdown-toggle btn-sm"
@@ -166,3 +173,14 @@ export default {
     }
 }
 </script>
+<style>
+.img-thumbnail {
+    width: 70px;
+    height: 70px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 5px;
+    background-color: aliceblue;
+}
+</style>

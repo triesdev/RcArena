@@ -43,7 +43,7 @@ class EventController extends PanelController
 
         $data = Event::create([
             "user_organizer_id" => $request->user_organizer_id,
-            "created_by_user_id" => "",
+            "created_by_user_id" => $request->auth_user['id'],
             "name" => $request->name,
             "image_uri" => $request->image_uri,
             "description" => $request->description,

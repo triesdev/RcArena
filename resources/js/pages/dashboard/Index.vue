@@ -6,14 +6,14 @@
                     <h1 class="page-headingtext-dark fw-bold fs-3">
                         {{ title }}
                     </h1>
-                    <div class="page-headingtext-dark fw-bold fs-3">{{ subtitle }}</div>
+                    <div class="page-headingtext-dark fw-bold fs-4">{{ subtitle }}</div>
                 </div>
             </div>
         </div>
         <div class="app-content flex-column-fluid">
             <div class="app-container container-xxl">
                 <div class="row">
-                    <div class="col-md-8 mb-5">
+                    <!-- <div class="col-md-8 mb-5">
                         <div class="rounded-3 bg-white p-4">
                             <div class="text-lg h4">Web Activity (last 30 days)</div>
                             <LineChart v-if="content.chart_loaded" class="max-h-96" :chartData="chart_data"
@@ -212,7 +212,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -229,7 +229,7 @@ import moment from "moment";
 export default {
     components: { LineChart },
     setup() {
-        const title = "Jogja Cardiovascular Epidemiology & Prevention Forum 2025"
+        const title = "Rocket Arena"
         const subtitle = moment().format('DD MMM, HH:mm')
         const breadcrumb_list = ["Dashboard"];
         const { getData } = useAxios()

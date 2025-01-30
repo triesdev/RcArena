@@ -71,14 +71,14 @@ class MenuSeed extends Seeder
                 'url'      => "/panel/users--",
                 'type'     => "menu",
                 'children' => [
+                    // [
+                    //     'title' => "Tambah Baru",
+                    //     'icon'  => "",
+                    //     'url'   => "/panel/users/add",
+                    //     'type'  => "submenu",
+                    // ],
                     [
-                        'title' => "Tambah Baru",
-                        'icon'  => "",
-                        'url'   => "/panel/users/add",
-                        'type'  => "submenu",
-                    ],
-                    [
-                        'title' => "Data",
+                        'title' => "User",
                         'icon'  => "",
                         'url'   => "/panel/users",
                         'type'  => "submenu",

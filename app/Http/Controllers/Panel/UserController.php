@@ -70,6 +70,7 @@ class UserController extends ApiController
         $data->update([
             'name' => $request->name,
             'phone_number' => $request->phone_number,
+            'role_id' => $request->role_id,
         ]);
 
         return $this->successResponse("Success", $data);
