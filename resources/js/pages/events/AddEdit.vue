@@ -35,20 +35,22 @@
                                 <div class="mb-5 col-md-6 fv-row fv-plugins-icon-container">
                                     <label class="form-label text-slate-400">Lokasi</label>
                                     <input type="text" class="form-control mb-2" v-model="form.location_name">
-                                    <div class="fv-plugins-message-container invalid-feedback" v-if="getStatus('name')">
-                                        {{ getMessage('name') }}
+                                    <div class="fv-plugins-message-container invalid-feedback"
+                                        v-if="getStatus('location_name')">
+                                        {{ getMessage('location_name') }}
                                     </div>
                                 </div>
                                 <div class="mb-5 col-md-6 fv-row fv-plugins-icon-container">
                                     <label class="form-label text-slate-400">Alamat</label>
                                     <input type="text" class="form-control mb-2" v-model="form.location_address">
-                                    <div class="fv-plugins-message-container invalid-feedback" v-if="getStatus('name')">
-                                        {{ getMessage('name') }}
+                                    <div class="fv-plugins-message-container invalid-feedback"
+                                        v-if="getStatus('location_address')">
+                                        {{ getMessage('location_address') }}
                                     </div>
                                 </div>
                                 <div class="mb-5 col-md-12 fv-row fv-plugins-icon-container">
                                     <label class="form-label text-slate-400">Jadwal</label>
-                                    <textarea class="form-control mb-2" v-model="form.schedules"></textarea>
+                                    <VueEditor v-model="form.schedules"></VueEditor>
                                     <div class="fv-plugins-message-container invalid-feedback"
                                         v-if="getStatus('schedules')">
                                         {{ getMessage('schedules') }}
@@ -85,6 +87,9 @@
                                     <label class="form-label text-slate-400">Penyelenggara</label>
                                     <select class="form-control mb-2" v-model="form.user_organizer_id">
                                         <option value="">Pilih Penyelenggara</option>
+                                        <option v-for="organizer in form_props.organizers" :value="organizer.id">{{
+                                            organizer.name
+                                            }}</option>
                                     </select>
                                     <div class="fv-plugins-message-container invalid-feedback"
                                         v-if="getStatus('user_organizer_id')">
@@ -120,6 +125,17 @@
                                         style="width: 200px; height: 200px; background-color: aliceblue; background-size: contain; background-position: center; background-repeat: no-repeat;"
                                         alt=""></div>
                                 </div>
+                                <div class="mb-5 col-md-6 fv-row fv-plugins-icon-container">
+                                    <label class="form-label text-slate-400">Status</label>
+                                    <select class="form-control mb-2" v-model="form.is_active">
+                                        <option value="1">Aktif</option>
+                                        <option value="0">Non Aktif</option>
+                                    </select>
+                                    <div class="fv-plugins-message-container invalid-feedback"
+                                        v-if="getStatus('is_active')">
+                                        {{ getMessage('is_active') }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -154,9 +170,10 @@ import useAxios from "../../src/service";
 import useValidation from "../../src/validation";
 import { useRouter, useRoute } from "vue-router";
 import { handleFileProcessData } from "../../src/firebase_upload";
+import { VueEditor } from "vue3-editor";
 
 export default {
-    components: { Breadcrumb },
+    components: { Breadcrumb, VueEditor },
     setup() {
         const { postData, getData, patchData } = useAxios()
         const router = useRouter()
@@ -168,6 +185,7 @@ export default {
             is_loading: false,
             errors: [],
             edit_mode: false,
+            organizers: [],
         })
 
         const param_id = route.params.id
@@ -245,6 +263,14 @@ export default {
                 form.image_uri = await handleFileProcessData(input.files[0])
             }
         }
+
+        function loadUsers() {
+            getData('users', { role_id: '5', per_page: 100 }).then((data) => {
+                form_props.organizers = data.result.data
+            })
+        }
+
+        loadUsers()
 
         return {
             breadcrumb_list,
