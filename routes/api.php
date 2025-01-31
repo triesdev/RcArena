@@ -44,6 +44,7 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
     Route::group(['prefix' => 'cart'], function () {
         Route::post('add-ticket', [CartController::class, 'addToCarts']);
         Route::get('/', [CartController::class, 'getCarts']);
+        Route::post('/handle-calculation-qty-cart', [CartController::class, 'handleCalculationQtyCart']);
     });
 
     // Transaction
@@ -67,6 +68,7 @@ Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], functio
     Route::resource("menu-role", MenuRoleController::class);
 
     Route::resource("transactions", PanelTransactionController::class);
+    Route::patch("transaction-payment-process/{payment_id}", [PanelTransactionController::class, "paymentProcess"]);
     Route::resource("events", PanelEventController::class);
 
     Route::get("menu-tree", [MenuRoleController::class, "menuTree"]);

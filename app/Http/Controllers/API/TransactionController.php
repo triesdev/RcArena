@@ -8,6 +8,7 @@ use App\Http\Repository\TransactionRepository;
 use App\Models\Ticket;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
+use App\Models\TransactionDetailUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -114,6 +115,7 @@ class TransactionController extends ApiController
             $transaction->transaction_date = $transaction_date;
             $transaction->payment_limit_date = $payment_limit_date;
             $transaction->transaction_number = $this->generateInvoiceNumberTransactions();
+            $transaction->subtotal_price = $total_cart_prices;
             $transaction->unique_code_price = $unique_code_price;
             $transaction->total_price = $total_cart_prices + $unique_code_price;
             $transaction->save();
@@ -123,7 +125,7 @@ class TransactionController extends ApiController
             $ticket_ids_ordered_asc = $carts->pluck('ticket_id')->toArray();
             sort($ticket_ids_ordered_asc);
 
-            $tickets = Ticket::whereIn('id', $ticket_ids_ordered_asc)->sharedLock()->get();
+            $tickets = Ticket::whereIn('id', $ticket_ids_ordered_asc)->lockForUpdate()->get();
 
             // INSERT Transaction Details
             $transaction_detail_response = [];
@@ -218,5 +220,9 @@ class TransactionController extends ApiController
             7 => 'VII', 8 => 'VIII', 9 => 'IX', 10 => 'X', 11 => 'XI', 12 => 'XII'
         ];
         return $map[(int)$month];
+    }
+
+    public function getTicketTransactionDetailUsers()
+    {
     }
 }

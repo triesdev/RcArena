@@ -49,7 +49,7 @@
                         </div>
                         <div class="card mb-4 card-flush">
                             <div class="card-body">
-                                <div >
+                                <div v-if="data_content.data_detail.payment">
                                     <h3 class="fw-bold">Status Pemesanan</h3>
                                     <div class="grid grid-cols-2 gap-4 mt-4">
                                         <div class="col-span-2">
@@ -59,50 +59,75 @@
                                                     <td width="50%" class="text-gray-600">Status</td>
                                                     <td>:</td>
                                                     <td class="fw-bold">
-                                                        {{data_content.data_detail.status}}
+                                                        <span class="badge badge-sm" :class="{
+                                                            'badge-primary': data_content.data_detail.payment.payment_status === 'new',
+                                                            'badge-success': data_content.data_detail.payment.payment_status === 'confirmed',
+                                                            'badge-danger': data_content.data_detail.payment.payment_status === 'reject',
+                                                            'badge-warning': data_content.data_detail.payment.payment_status === 'pending'
+                                                        }">
+                                                            {{data_content.data_detail.payment.payment_status.toUpperCase()}}
+                                                        </span>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td width="50%" class="text-gray-600">Nama Rekening Pengirim</td>
                                                     <td>:</td>
                                                     <td class="fw-bold">
-                                                        {{data_content.data_detail.account_name}}
+                                                        {{data_content.data_detail.payment.account_name}}
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td width="50%" class="text-gray-600">Waktu Pembayaran</td>
                                                     <td>:</td>
                                                     <td class="fw-bold">
-                                                        {{data_content.data_detail.payment_date}}
+                                                        {{data_content.data_detail.payment.payment_date}}
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td width="50%" class="text-gray-600">Bukti Bayar</td>
                                                     <td>:</td>
                                                     <td class="fw-bold">
-                                                        <a href="#" class="text-primary text-hover-dark">Lihat bukti bayar</a>
+                                                        <a target="_blank" :href="data_content.data_detail.payment.payment_proof_image_uri" class="text-primary text-hover-dark">Lihat bukti bayar</a>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td width="50%" class="text-gray-600">Catatan</td>
                                                     <td>:</td>
                                                     <td class="fw-bold">
-                                                        {{data_content.data_detail.note}}
+                                                        {{data_content.data_detail.payment.note}}
                                                     </td>
                                                 </tr>
                                                 </tbody>
                                             </table>
-                                            <div class="flex justify-end mt-10 gap-2">
-                                                <button class="btn btn-sm btn-primary">
+                                            <div v-if="data_content.data_detail.payment.payment_status == 'new'" class="flex justify-end mt-10 gap-2">
+                                                <button @click="openModalConfirm('Konfirmasi','confirmed')" class="btn btn-sm btn-primary">
                                                     Konfirmasi
                                                 </button>
-                                                <button class="btn btn-sm btn-secondary">
+                                                <button @click="openModalConfirm('Upload Ulang','pending')" class="btn btn-sm btn-secondary">
                                                     Upload Ulang Bukti Bayar
                                                 </button>
-                                                <button class="btn btn-sm btn-danger">
+                                                <button @click="openModalConfirm('Reject','reject')" class="btn btn-sm btn-danger">
                                                     Reject
                                                 </button>
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-else>
+                                    <h3 class="fw-bold">Status Pemesanan</h3>
+                                    <div class="grid grid-cols-2 gap-4 mt-4">
+                                        <div class="col-span-2">
+                                            <table class="w-100">
+                                                <tbody class="detail-table">
+                                                <tr>
+                                                    <td width="50%" class="text-gray-600">Status</td>
+                                                    <td>:</td>
+                                                    <td class="fw-bold">
+                                                        <span class="badge badge-sm badge-warning">Belum Dibayar</span>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -152,25 +177,25 @@
                                                 <div class="flex justify-between mb-2">
                                                     <span>Sub Total</span>
                                                     <span>
-                                                        0000
+                                                        {{ data_content.data_detail.subtotal_price }}
                                                     </span>
                                                 </div>
                                                 <div class="flex justify-between mb-2">
                                                     <span>Kode Unik</span>
                                                     <span>
-                                                        0000
+                                                        {{ data_content.data_detail.unique_code_price }}
                                                     </span>
                                                 </div>
                                                 <div class="flex justify-between mb-2">
                                                     <span>Diskon</span>
                                                     <span>
-                                                        0000
+                                                        {{ data_content.data_detail.discount_price }}
                                                     </span>
                                                 </div>
                                                 <div class="flex justify-between">
                                                     <span>Total</span>
                                                     <span>
-                                                        0000
+                                                        {{ data_content.data_detail.total_price }}
                                                     </span>
                                                 </div>
                                             </div>
@@ -217,6 +242,7 @@
                 </div>
             </div>
         </div>
+        <WidgetContainerModal></WidgetContainerModal>
     </div>
 </template>
 <script>
@@ -226,9 +252,11 @@ import useAxios from "../../src/service";
 import useValidation from "../../src/validation";
 import { useRouter, useRoute } from "vue-router";
 import Axios from "axios";
+import { container, promptModal} from "jenesius-vue-modal";
+import ModalApprove from "./ModalApprove.vue";
 
 export default {
-    components: { Breadcrumb },
+    components: { Breadcrumb, WidgetContainerModal: container },
     setup() {
         const { getData, patchData, postData } = useAxios()
         const router = useRouter()
@@ -328,6 +356,16 @@ export default {
             })
         }
 
+         async function openModalConfirm(title, confirm_type) {
+            await promptModal(ModalApprove, {
+                title: title,
+                payment_id: param_id,
+                confirm_type: confirm_type
+            },{
+                backgroundClose: false,
+            });
+        }
+
         return {
             breadcrumb_list,
             title,
@@ -339,7 +377,8 @@ export default {
             data_content,
             acceptPayment,
             deletePayment,
-            printName
+            printName,
+            openModalConfirm,
         }
     }
 }

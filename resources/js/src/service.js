@@ -17,6 +17,7 @@ export default function useAxios() {
     }
 
     function handleError(e) {
+        console.log(e,'error')
         if (e.response.status === 401) {
             window.location = '/auth/login'
             result.value.success = false;
@@ -67,19 +68,16 @@ export default function useAxios() {
     }
 
     async function patchData(url, data) {
-        await axios.patch(base_url + url, data, {
-            headers: setHeader()
-        }).then(({ data }) => {
-            result.value = data
-        }).catch((e) => {
+        try {
+            const response = await axios.patch(base_url + url, data, {
+                headers: setHeader()
+            });
+            result.value = response.data;
+        } catch (e) {
             handleError(e);
-        });
-
-        if (result.value.success) {
-            return result.value
-        } else {
-            return result.value;
         }
+
+        return result.value;
     }
 
     async function deleteData(url, data) {

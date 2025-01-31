@@ -110,6 +110,7 @@ class AuthController extends ApiController
                     'name' => $name,
                     'email' => $email,
                     'password' => Hash::make(rand(100000, 999999)),
+                    'phone_number' => '',
                     'image_uri' => $image_uri,
                     'api_token' => StringGenerator::generateAlphanumeric(60),
                     'role_id' => Role::whereIsDefault(1)->whereType('mobile')->first()->id,

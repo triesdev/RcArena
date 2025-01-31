@@ -13,6 +13,11 @@ class ApiController
         return ApiResponse::success($message, $result);
     }
 
+    protected function createSuccessResponse(string $message = 'Success', $result = null): \Illuminate\Http\JsonResponse
+    {
+        return ApiResponse::createSuccess($message, $result);
+    }
+
     protected function errorResponse(string $message = 'Error',  $result = null, int $statusCode = 400): \Illuminate\Http\JsonResponse
     {
         return ApiResponse::error($message, $result, $statusCode);

@@ -154,7 +154,6 @@ export default {
         function loadDataContent(page = 1) {
             is_loading.value = true
             transaction_store.page = page
-            console.log('call Load')
 
             getData('transactions', transaction_store).then((data) => {
                 response.data_content = data.result

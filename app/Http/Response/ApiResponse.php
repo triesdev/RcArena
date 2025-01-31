@@ -24,6 +24,15 @@ class ApiResponse
         ]);
     }
 
+    public static function createSuccess(string $message = 'Success',  $result = null): \Illuminate\Http\JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'result' => $result
+        ],201);
+    }
+
     public static function error(string $message = 'Error',  $errors = null, int $statusCode = 400): \Illuminate\Http\JsonResponse
     {
         return response()->json([
