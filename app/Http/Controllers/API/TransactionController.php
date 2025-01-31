@@ -42,6 +42,7 @@ class TransactionController extends ApiController
                 return $q->where('event_id', $request->event_id);
             })
             ->where("transactions.user_id",$request->auth_user->id)
+            ->groupBy('transactions.id')
             ->limit($request->limit ?? 10)->offset($request->offset ?? 0)
             ->get();
 

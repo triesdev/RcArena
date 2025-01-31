@@ -30,8 +30,18 @@ class PaymentController extends ApiController
             return $this->errorResponse("Transaction not found");
         }
 
-        if ($transaction->transaction_status != 'unpaid'){
+        $status_allowed = ['new','process'];
+        if (!in_array($transaction->transaction_status, $status_allowed)) {
             return $this->errorResponse("Transaction already paid");
+        }
+
+        $payment = Payment::where('transaction_id', $request->transaction_id)->first();
+
+        if($payment){
+            // Check If Payment Not Pending
+            if($payment->payment_status != 'pending'){
+                return $this->errorResponse("Payment already exist");
+            }
         }
 
         DB::beginTransaction();
@@ -42,17 +52,34 @@ class PaymentController extends ApiController
 
             $auth_user = $request->auth_user;
 
-            $payment = Payment::create([
-                'user_id' => $auth_user->id,
-                'transaction_id' => $request->transaction_id,
-                'name' => $request->name,
-                'payment_date' => date('Y-m-d H:i:s'),
-                'account_name' => $request->account_name,
-                'phone_number' => $request->phone_number,
-                'payment_proof_image_uri' => $request->payment_proof_image_uri,
-                'nominal_payment' => $transaction->total_price,
-                'is_confirmed' => 0,
-            ]);
+            if ($payment) {
+                // If Exist Update Payment
+                $payment->update([
+                    'user_id' => $auth_user->id,
+                    'transaction_id' => $request->transaction_id,
+                    'name' => $request->name,
+                    'payment_date' => date('Y-m-d H:i:s'),
+                    'account_name' => $request->account_name,
+                    'phone_number' => $request->phone_number,
+                    'payment_proof_image_uri' => $request->payment_proof_image_uri,
+                    'nominal_payment' => $transaction->total_price,
+                    'is_confirmed' => 0,
+                    'payment_status' => 'new', // UPDATE STATUS PAYMENT NEW
+                ]);
+            } else {
+                // If Not Exist Create Payment
+                $payment = Payment::create([
+                    'user_id' => $auth_user->id,
+                    'transaction_id' => $request->transaction_id,
+                    'name' => $request->name,
+                    'payment_date' => date('Y-m-d H:i:s'),
+                    'account_name' => $request->account_name,
+                    'phone_number' => $request->phone_number,
+                    'payment_proof_image_uri' => $request->payment_proof_image_uri,
+                    'nominal_payment' => $transaction->total_price,
+                    'is_confirmed' => 0,
+                ]);
+            }
 
             DB::commit();
             return $this->successResponse("Success", $payment);
