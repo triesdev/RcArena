@@ -51,6 +51,9 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
     Route::resource("transactions", TransactionController::class);
     Route::get("transactions/detail-payment/{id}", [TransactionController::class, "getTransactionForPayment"]);
 
+    // Ticket User => Transaction Detail Users
+    Route::get("user-tickets", [TicketController::class, "userTickets"]);
+
     // Payment
     Route::resource("payments", PaymentController::class);
 });

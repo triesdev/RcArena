@@ -8,6 +8,7 @@ use App\Models\Ticket;
 use App\Models\TicketBundle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class TicketController extends ApiController
 {
@@ -46,5 +47,45 @@ class TicketController extends ApiController
         } catch (\Exception $ex) {
             return $this->errorResponse($ex->getMessage());
         }
+    }
+
+    public function userTickets(Request $request)
+    {
+        $user = $request->auth_user;
+
+        $status = $request->input("status");
+
+        $sqlRawInject = "";
+        $nowDateTime = date('Y-m-d H:i:s');
+        if ($status == 'active'){
+            // EVENT ACTIVE BY DATE
+            $sqlRawInject = " AND events.event_end >= '{$nowDateTime}'";
+            $sqlRawInject .= " AND events.event_start <= '{$nowDateTime}'";
+        } else if ($status == 'inactive'){
+            // EVENT PAST BY DATE
+            $sqlRawInject = " AND events.event_start < '{$nowDateTime}'";
+        }
+
+        $rawQuery = "
+            SELECT
+                transactions.id,
+                transactions.transaction_number,
+                transactions.transaction_date,
+                COUNT(transaction_details.id) as total_ticket,
+                transactions.event_id as event_id, events.name as event_name, events.event_start as event_start_date, events.event_end as event_end_date, events.location_name as event_location_name, events.location_address as event_location_address
+            FROM transactions
+            LEFT JOIN events ON transactions.event_id = events.id
+            LEFT JOIN (
+                SELECT transaction_details.id, transaction_details.transaction_id, transaction_detail_users.id as transaction_detail_users_id FROM transaction_details JOIN transaction_detail_users ON transaction_details.id = transaction_detail_users.transaction_detail_id WHERE transaction_detail_users.user_id = {$user->id} AND transaction_detail_users.deleted_at IS NULL
+            ) as transaction_details ON transactions.id = transaction_details.transaction_id
+            WHERE user_id = {$user->id} AND transactions.transaction_status = 'success' AND transactions.deleted_at IS NULL
+            {$sqlRawInject}
+            GROUP BY transactions.id
+            HAVING total_ticket > 0
+        ";
+
+        $transaction = DB::select($rawQuery);
+
+        return $this->successResponse("Success", $transaction);
     }
 }
