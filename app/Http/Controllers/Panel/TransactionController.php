@@ -28,6 +28,7 @@ class TransactionController extends ApiController
             ->leftJoin('transaction_details', 'transactions.id', '=', 'transaction_details.transaction_id')
             ->orderBy('transactions.created_at', 'desc')
             ->select('transactions.*', 'events.name as event_name',DB::raw('SUM(transaction_details.qty) as total_qty'))
+            ->groupBy('transactions.id')
             ->paginate(10);
 
         return $this->successResponse('Transaction list', $transactions);
@@ -77,6 +78,7 @@ class TransactionController extends ApiController
                 'confirmation_by_user_id' => $user->id,
                 'is_confirmed' => $is_confirmed,
                 'payment_status' => $confirm_type,
+                'note' => $request->note,
             ]);
 
             $transaction_id = $payment->transaction_id;

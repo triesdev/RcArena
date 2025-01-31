@@ -11,6 +11,7 @@
         </div>
         <div class="app-content flex-column-fluid">
             <div class="app-container container-xxl">
+                <Loading :active="form_props.is_loading" :loader="'dots'" :is-full-page="false" />
                 <div class="grid grid-cols-3 gap-4">
                     <div class="col-span-2 md:col-span-2">
                         <div class="card mb-4 card-flush">
@@ -37,7 +38,7 @@
                                                         <td width="50%" class="text-gray-600">Nominal Pembayaran</td>
                                                         <td>:</td>
                                                         <td class="fw-bold">
-                                                            {{data_content.data_detail.total_price}}
+                                                            {{$filter.currency(data_content.data_detail.total_price)}}
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -117,17 +118,9 @@
                                     <h3 class="fw-bold">Status Pemesanan</h3>
                                     <div class="grid grid-cols-2 gap-4 mt-4">
                                         <div class="col-span-2">
-                                            <table class="w-100">
-                                                <tbody class="detail-table">
-                                                <tr>
-                                                    <td width="50%" class="text-gray-600">Status</td>
-                                                    <td>:</td>
-                                                    <td class="fw-bold">
-                                                        <span class="badge badge-sm badge-warning">Belum Dibayar</span>
-                                                    </td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
+                                            <span class="fw-bold text-danger flex align-middle">
+                                                <v-icon name="bi-exclamation-circle-fill" class="mr-2"></v-icon> Belum ada pembayaran
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -164,7 +157,7 @@
                                                                         {{ticket.qty}}x Tiket
                                                                     </td>
                                                                     <td width="30%" class="fw-normal text-right">
-                                                                        {{ticket.subtotal_price}}
+                                                                        {{$filter.currency(ticket.subtotal_price)}}
                                                                     </td>
                                                                 </tr>
                                                            </tbody>
@@ -177,25 +170,25 @@
                                                 <div class="flex justify-between mb-2">
                                                     <span>Sub Total</span>
                                                     <span>
-                                                        {{ data_content.data_detail.subtotal_price }}
+                                                        {{ $filter.currency(data_content.data_detail.subtotal_price) }}
                                                     </span>
                                                 </div>
                                                 <div class="flex justify-between mb-2">
                                                     <span>Kode Unik</span>
                                                     <span>
-                                                        {{ data_content.data_detail.unique_code_price }}
+                                                        {{ $filter.currency(data_content.data_detail.unique_code_price) }}
                                                     </span>
                                                 </div>
                                                 <div class="flex justify-between mb-2">
                                                     <span>Diskon</span>
                                                     <span>
-                                                        {{ data_content.data_detail.discount_price }}
+                                                        {{ $filter.currency(data_content.data_detail.discount_price) }}
                                                     </span>
                                                 </div>
                                                 <div class="flex justify-between">
                                                     <span>Total</span>
                                                     <span>
-                                                        {{ data_content.data_detail.total_price }}
+                                                        {{ $filter.currency(data_content.data_detail.total_price) }}
                                                     </span>
                                                 </div>
                                             </div>
@@ -207,19 +200,22 @@
                     </div>
                     <div class="col-span-1 md:col-span-1">
                         <div class="card card-flush">
-                            <div class="card-body">
+                            <div v-if="data_content.data_detail.user" class="card-body">
                                 <h3 class="fw-bold">Detail Pemesan</h3>
                                 <div class="mt-4">
-                                    <img src="/assets/default-profile.jpg" alt="Profile Image" class="rounded w-full h-fit">
+                                    <img :src="`${data_content.data_detail.user.image_uri ?? '/assets/default-profile.jpg'}`" alt="Profile Image" class="rounded w-full h-fit">
                                 </div>
                                 <div class="mt-4">
                                     <h4 class="fw-bold">Nama</h4>
-                                    <p>Nama User</p>
+                                    <p>{{data_content.data_detail.user.name}}</p>
                                     <h4 class="mt-2 fw-bold">No Whatsapp</h4>
-                                    <p>Phone Number</p>
+                                    <p>{{data_content.data_detail.user.phone_number}}</p>
                                 </div>
                             </div>
                         </div>
+                        <router-link class="btn btn-danger btn-sm mt-2 w-100" to="/panel/transactions">
+                            Kembali
+                        </router-link>
                     </div>
 <!--                    <div class="col-span-2 text-right">-->
 <!--                        <router-link to="/panel/transactions"-->
@@ -247,13 +243,14 @@
 </template>
 <script>
 import Breadcrumb from "../../components/Breadcrumb";
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 import useAxios from "../../src/service";
 import useValidation from "../../src/validation";
 import { useRouter, useRoute } from "vue-router";
 import Axios from "axios";
 import { container, promptModal} from "jenesius-vue-modal";
 import ModalApprove from "./ModalApprove.vue";
+import SwalToast from '../../src/swal_toast'
 
 export default {
     components: { Breadcrumb, WidgetContainerModal: container },
@@ -285,11 +282,23 @@ export default {
             name: '',
         })
 
-        if (form_props.edit_mode) {
+        const payment_id = ref(0);
+
+        function getDetail(){
+            form_props.is_loading = true
             getData('transactions/' + param_id)
                 .then((data) => {
                     data_content.data_detail = data.result
+                    if (data_content.data_detail.payment){
+                        payment_id.value = data_content.data_detail.payment.id
+                    }
+
+                    form_props.is_loading = false
                 })
+        }
+
+        if (form_props.edit_mode) {
+           getDetail();
         }
 
         function editData() {
@@ -357,13 +366,18 @@ export default {
         }
 
          async function openModalConfirm(title, confirm_type) {
-            await promptModal(ModalApprove, {
+            const boolResp = await promptModal(ModalApprove, {
                 title: title,
-                payment_id: param_id,
+                payment_id: payment_id.value,
                 confirm_type: confirm_type
             },{
                 backgroundClose: false,
             });
+
+            if (boolResp) {
+                SwalToast('Berhasil memproses pembayaran.')
+                getDetail()
+            }
         }
 
         return {

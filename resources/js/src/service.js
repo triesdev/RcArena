@@ -17,7 +17,6 @@ export default function useAxios() {
     }
 
     function handleError(e) {
-        console.log(e,'error')
         if (e.response.status === 401) {
             window.location = '/auth/login'
             result.value.success = false;

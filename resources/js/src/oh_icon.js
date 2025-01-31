@@ -19,7 +19,7 @@ import {
     BiShieldCheck,
     BiTags,
     BiVectorPen,
-    BiEye, BiWhatsapp,
+    BiEye, BiWhatsapp, BiExclamation, BiExclamationCircleFill,
 } from "oh-vue-icons/icons/bi";
 
 addIcons(
@@ -43,7 +43,8 @@ addIcons(
   BiTags,
   BiVectorPen,
   BiEye,
-    BiWhatsapp
+    BiWhatsapp,
+    BiExclamationCircleFill
 );
 
 // register components

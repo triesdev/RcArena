@@ -92,7 +92,14 @@
                                                         $filter.currency(data.total_price) }}</div>
                                             </td>
                                             <td>
-                                                <span class="badge badge-info">{{ data.transaction_status.toUpperCase() }}</span>
+                                                <span class="badge badge-sm" :class="{
+                                                            'badge-primary': data.transaction_status === 'unpaid',
+                                                            'badge-warning': data.transaction_status === 'process',
+                                                            'badge-success': data.transaction_status === 'success',
+                                                            'badge-danger': data.transaction_status === 'reject',
+                                                }">
+                                                    {{data.transaction_status.toUpperCase()}}
+                                                </span>
                                             </td>
                                             <td class="text-end">
                                                 <router-link :to="`/panel/transaction-detail/${data.id}`"

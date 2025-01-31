@@ -44,12 +44,10 @@ export default {
             /*Update Data*/
             patchData(`transaction-payment-process/${props.payment_id}`, form.value)
                 .then(() => {
-                    console.log("success");
-                    // emit(Modal.EVENT_PROMPT, 1);
+                    emit(Modal.EVENT_PROMPT, 1);
                 })
                 .catch(() => {
-                    console.log('err');
-                    // emit(Modal.EVENT_PROMPT, 0);
+                    emit(Modal.EVENT_PROMPT, 0);
                 });
         }
 
