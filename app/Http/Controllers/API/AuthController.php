@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Utils\StringGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use GuzzleHttp\Client;
 
@@ -82,6 +83,8 @@ class AuthController extends ApiController
     public function SSOLogin(Request $request)
     {
         try {
+
+            Log::info("SSO Login Request: " . json_encode($request->all()));
 
             $client = new Client();
             $endPoint = "https://www.googleapis.com/oauth2/v3/userinfo?access_token=" . $request->access_token;
