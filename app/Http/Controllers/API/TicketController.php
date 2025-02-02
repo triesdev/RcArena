@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\ApiController;
+use App\Http\Repository\TransactionRepository;
 use App\Models\EventClass;
 use App\Models\Ticket;
 use App\Models\TicketBundle;
@@ -51,41 +52,13 @@ class TicketController extends ApiController
 
     public function userTickets(Request $request)
     {
-        $user = $request->auth_user;
+        $transactions = (new TransactionRepository())->TicketTransactionDetailUsers($request);
+        return $this->successResponse("Success", $transactions);
+    }
 
-        $status = $request->input("status");
-
-        $sqlRawInject = "";
-        $nowDateTime = date('Y-m-d H:i:s');
-        if ($status == 'active'){
-            // EVENT ACTIVE BY DATE
-            $sqlRawInject = " AND events.event_end >= '{$nowDateTime}'";
-            $sqlRawInject .= " AND events.event_start <= '{$nowDateTime}'";
-        } else if ($status == 'inactive'){
-            // EVENT PAST BY DATE
-            $sqlRawInject = " AND events.event_start < '{$nowDateTime}'";
-        }
-
-        $rawQuery = "
-            SELECT
-                transactions.id,
-                transactions.transaction_number,
-                transactions.transaction_date,
-                COUNT(transaction_details.id) as total_ticket,
-                transactions.event_id as event_id, events.name as event_name, events.event_start as event_start_date, events.event_end as event_end_date, events.location_name as event_location_name, events.location_address as event_location_address
-            FROM transactions
-            LEFT JOIN events ON transactions.event_id = events.id
-            LEFT JOIN (
-                SELECT transaction_details.id, transaction_details.transaction_id, transaction_detail_users.id as transaction_detail_users_id FROM transaction_details JOIN transaction_detail_users ON transaction_details.id = transaction_detail_users.transaction_detail_id WHERE transaction_detail_users.user_id = {$user->id} AND transaction_detail_users.deleted_at IS NULL
-            ) as transaction_details ON transactions.id = transaction_details.transaction_id
-            WHERE user_id = {$user->id} AND transactions.transaction_status = 'success' AND transactions.deleted_at IS NULL
-            {$sqlRawInject}
-            GROUP BY transactions.id
-            HAVING total_ticket > 0
-        ";
-
-        $transaction = DB::select($rawQuery);
-
-        return $this->successResponse("Success", $transaction);
+    public function userTicketsByTransactionId($transaction_id, Request $request){
+        $auth_user = $request->auth_user;
+        $transactions = (new TransactionRepository())->getTicketsByTransactionId($transaction_id, $auth_user);
+        return $this->successResponse("Success", $transactions);
     }
 }

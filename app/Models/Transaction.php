@@ -24,6 +24,12 @@ class Transaction extends Model
         return $this->transaction_details()->leftJoin("tickets","ticket_id","=","tickets.id")->leftJoin("classes","classes.id","=","tickets.class_id")->select("classes.name as class_name","classes.id as class_id","tickets.id as ticket_id","transaction_details.id","transaction_details.transaction_id")->groupBy('tickets.class_id');
     }
 
+    public function transaction_detail_users()
+    {
+        // get many from transaction detail users table
+        return $this->hasMany(TransactionDetailUser::class, "transaction_id", "id");
+    }
+
     public function scopeLeftJoinUser($query){
         return $query->leftJoin("users", "transactions.user_id", "=", "users.id");
     }
