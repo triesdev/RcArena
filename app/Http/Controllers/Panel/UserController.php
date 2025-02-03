@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Panel;
 
 use App\Http\Controllers\ApiController;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -54,7 +55,7 @@ class UserController extends ApiController
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required',
-            "phone_number" => 'required',
+            'phone_number' => 'required|numeric|digits_between:10,15',
         ]);
 
         if ($validator->fails()) {
@@ -67,10 +68,12 @@ class UserController extends ApiController
             return $this->notFoundResponse();
         }
 
+        $role_id_default_mobile = Role::whereType('mobile')->whereIsDefault(1)->first()->id;
+
         $data->update([
             'name' => $request->name,
             'phone_number' => $request->phone_number,
-            'role_id' => $request->role_id,
+            'role_id' => $role_id_default_mobile,
         ]);
 
         return $this->successResponse("Success", $data);
@@ -88,6 +91,8 @@ class UserController extends ApiController
             $data->delete();
             return $this->successResponse("Deleted");
         }
+
+        return $this->errorResponse("delete failed");
     }
 
     //    public function show($id, Request $request)
