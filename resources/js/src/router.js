@@ -17,6 +17,7 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import Transactions from "../pages/transactions/Index.vue";
 import TransactionsValidate from "../pages/transactions/Validate.vue";
 import TransactionsAddEdit from "../pages/transactions/AddEdit.vue";
+import TransactionAdd from "../pages/transactions/Add.vue";
 import TransactionsDetail from "../pages/transactions/Detail.vue";
 
 import Event from "../pages/events/Index.vue";
@@ -45,6 +46,7 @@ const routes = [
             { path: 'transaction-detail/:id', component: TransactionsDetail, meta: { protected: true, title: "Transaction Detail" } },
 
             { path: 'transactions', component: Transactions, meta: { protected: true, title: "Transactions" } },
+            { path: 'add-transactions', component: TransactionAdd, meta: { protected: true, title: "Buat Pesanan Baru" } },
             { path: 'transactions-validate/:id', component: TransactionsValidate, meta: { protected: true, title: "Transactions Validate" } },
 
             { path: 'events', component: Event, meta: { protected: true, title: "Events" } },

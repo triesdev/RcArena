@@ -113,4 +113,19 @@ class EventController extends PanelController
         $data = Event::find($id)->delete();
         return $this->successResponse("Success", $data);
     }
+
+    public function properties(Request $request)
+    {
+        $data = Event::select("id", "name")
+            ->where("is_active", 1)
+            ->orderBy("name", "asc");
+
+        if ($request->name){
+            $data = $data->where("name", "like", "%".$request->name."%");
+        }
+
+        $data = $data->get();
+
+        return $this->successResponse("Success", $data);
+    }
 }
