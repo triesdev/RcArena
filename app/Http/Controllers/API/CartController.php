@@ -106,10 +106,25 @@ class CartController extends ApiController
         try {
             $this->response_ticket = [];
             $this->ticket_stock_check = [];
+
             if ($type == 'bundle') {
-                $this->bundleToCart($ticket_id);
+                // Validation if ticket id is not found
+                $tickets = Ticket::whereTicketBundleId($ticket_id)->get();
+
+                if ($tickets->count() == 0) {
+                    DB::rollBack();
+                    return $this->errorResponse("Ticket not found");
+                }
+
+                $this->bundleToCart($tickets);
             } else {
-                $this->pieceToCart($ticket_id);
+                // Validation if ticket id is bundle but wrong type
+                $ticket = Ticket::find($ticket_id);
+                if ($ticket->ticket_bundle_id) {
+                    DB::rollBack();
+                    return $this->errorResponse("Ticket is bundle type");
+                }
+                $this->pieceToCart($ticket);
             }
 
             if (count($this->ticket_stock_check) > 0) {
@@ -126,19 +141,15 @@ class CartController extends ApiController
         return $this->createSuccessResponse("Success", $this->response_ticket);
     }
 
-    private function bundleToCart($bundle_id)
+    private function bundleToCart($tickets)
     {
-        // LOCK FOR UPDATE TICKET BY TICKET BUNDLE ID
-        $tickets = Ticket::whereTicketBundleId($bundle_id)->get();
-
         foreach ($tickets as $ticket) {
-            $this->pieceToCart($ticket->id);
+            $this->pieceToCart($ticket);
         }
     }
 
-    private function pieceToCart($ticket_id)
+    private function pieceToCart($ticket)
     {
-        $ticket = Ticket::find($ticket_id);
 
         // IF TICKET EXIST ON CART
         $cart = Cart::whereUserId($this->user->id)->whereTicketId($ticket->id)->first();
@@ -170,6 +181,42 @@ class CartController extends ApiController
         }
 
         $this->response_ticket[] = $cart;
+    }
+
+    public function deleteBundleTicket($id, Request $request)
+    {
+        $user = $request->auth_user;
+
+        $carts = Cart::whereUserId($user->id)->whereTicketBundleId($id)->get();
+
+        // CHECK IF CART NOT FOUND
+        if ($carts->count() == 0) {
+            return $this->errorResponse("Cart not found");
+        }
+
+        // DELETE CART
+        $carts->each(function ($cart) {
+            $cart->delete();
+        });
+
+        return $this->successResponse("Success");
+    }
+
+    public function deletePieceTicket($id, Request $request)
+    {
+        $user = $request->auth_user;
+
+        $cart = Cart::whereUserId($user->id)->whereTicketId($id)->whereNull("ticket_bundle_id")->first();
+
+        // CHECK IF CART NOT FOUND
+        if (!$cart) {
+            return $this->errorResponse("Cart not found");
+        }
+
+        // DELETE CART
+        $cart->delete();
+
+        return $this->successResponse("Success");
     }
 
     public function handleCalculationQtyCart(Request $request)

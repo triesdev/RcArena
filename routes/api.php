@@ -51,6 +51,8 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
         Route::post('add-ticket', [CartController::class, 'addToCarts']);
         Route::get('/', [CartController::class, 'getCarts']);
         Route::post('/handle-calculation-qty-cart', [CartController::class, 'handleCalculationQtyCart']);
+        Route::delete('/delete-bundle-ticket/{id}', [CartController::class, 'deleteBundleTicket']);
+        Route::delete('/delete-piece-ticket/{id}', [CartController::class, 'deletePieceTicket']);
     });
 
     // Transaction
