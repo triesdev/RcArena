@@ -3,13 +3,6 @@ import { reactive } from "vue";
 
 export const useFilterStore = defineStore('filter', () => {
     const app_store = reactive({
-        client_id: null,
-        client_name: null,
-        client_logo: null,
-        client_mini_logo: null,
-        client_token: null,
-        auto_call: false,
-        station_id: null,
         role_id: null,
     })
 
@@ -64,7 +57,7 @@ export const useFilterStore = defineStore('filter', () => {
     const user_store = reactive({
         page: 1,
         per_page: 25,
-        type: 'user',
+        role: 'user',
         name: '',
     })
 

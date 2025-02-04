@@ -78,9 +78,15 @@ class MenuSeed extends Seeder
                     //     'type'  => "submenu",
                     // ],
                     [
-                        'title' => "User",
+                        'title' => "Admin (CMS)",
                         'icon'  => "",
-                        'url'   => "/panel/users",
+                        'url'   => "/panel/users?role=admin",
+                        'type'  => "submenu",
+                    ],
+                    [
+                        'title' => "User (Mobile App)",
+                        'icon'  => "",
+                        'url'   => "/panel/users?role=user",
                         'type'  => "submenu",
                     ],
                 ]

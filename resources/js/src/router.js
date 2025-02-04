@@ -31,8 +31,8 @@ const routes = [
         children: [
             { path: '', component: Dashboard, meta: { protected: true, title: "Dashboard" } },
             { path: 'dashboard', component: Dashboard, meta: { protected: true, title: "Dashboard" } },
-            { path: 'users', component: Users, meta: { protected: true, title: "Data Staff" } },
-            { path: 'users/:id', component: UserAddEdit, meta: { protected: true, title: "Sistem Antrian" } },
+            { path: 'users', component: Users, meta: { protected: true, title: "User" } },
+            { path: 'users/:id', component: UserAddEdit, meta: { protected: true, title: "User" } },
             { path: 'roles', component: Roles, meta: { protected: true, title: "Role" } },
             { path: 'roles/:id', component: RolesAddEdit, meta: { protected: true, title: "Role" } },
             { path: 'menus', component: Menus, meta: { protected: true, title: "Menu" } },
@@ -40,14 +40,9 @@ const routes = [
             { path: 'menu-role', component: MenuRole, meta: { protected: true, title: "Menu Role" } },
             { path: 'profile', component: Profile, meta: { protected: true, title: "Profile" } },
 
-            { path: 'transactions/:id', component: TransactionsAddEdit, meta: { protected: true, title: "Post" } },
-
             // Transaction Details
-            { path: 'transaction-detail/:id', component: TransactionsDetail, meta: { protected: true, title: "Transaction Detail" } },
-
             { path: 'transactions', component: Transactions, meta: { protected: true, title: "Transactions" } },
-            { path: 'add-transactions', component: TransactionAdd, meta: { protected: true, title: "Buat Pesanan Baru" } },
-            { path: 'transactions-validate/:id', component: TransactionsValidate, meta: { protected: true, title: "Transactions Validate" } },
+            { path: 'transaction-detail/:id', component: TransactionsDetail, meta: { protected: true, title: "Transaction Detail" } },
 
             { path: 'events', component: Event, meta: { protected: true, title: "Events" } },
             { path: 'events/:id', component: EventAddEdit, meta: { protected: true, title: "Event Update" } },

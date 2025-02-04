@@ -98,10 +98,11 @@ import PerPage from '../../components/PerPage'
 import StatusDefault from '../../components/StatusDefault'
 import useAxios from "../../src/service";
 import DeleteModal from "./DeleteModal"
-import { reactive, ref } from "vue";
+import { watch, reactive, ref } from "vue";
 import { container, promptModal } from "jenesius-vue-modal";
 import SwalToast from '../../src/swal_toast'
 import { useFilterStore } from "../../src/store_filter";
+import {useRoute} from "vue-router";
 
 export default {
     components: { Breadcrumb, PerPage, WidgetContainerModal: container, StatusDefault },
@@ -111,16 +112,17 @@ export default {
         const { getData, deleteData } = useAxios()
         const is_loading = ref(true)
         const { user_store } = useFilterStore()
+        const route = useRoute()
 
         function loadDataContent(page = 1) {
             is_loading.value = true
             user_store.page = page
+            user_store.role = route.query.role
             getData('users', user_store)
                 .then((data) => {
                     if (data.success) {
                         response.data_content = data.result
                     }
-
                     is_loading.value = false
                 })
         }
@@ -148,6 +150,14 @@ export default {
                     })
             }
         }
+
+        watch(
+            () => route.query,
+            (newQuery, oldQuery) => {
+                loadDataContent()
+            },
+            { deep: true } // Ensures watching for nested changes
+        )
 
         return {
             breadcrumb_list,

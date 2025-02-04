@@ -18,6 +18,21 @@ class UserController extends ApiController
             ->when($request->name, function ($query) use ($request) {
                 $query->where('users.name', 'like', '%' . $request->name . '%');
             })
+            ->when($request->role, function ($query) use ($request) {
+                $role_ids = [];
+                if($request->role == 'admin'){
+                    $env_admin = env('ROLE_ADMIN');
+                    $role_ids = explode(",", $env_admin);
+                } else if ($request->role == 'user'){
+                    $env_user = env('ROLE_USER');
+                    $role_ids = explode(",", $env_user);
+                }
+
+                if(count($role_ids) > 0){
+                    error_log(json_encode($role_ids));
+                    return $query->whereIn('role_id', $role_ids);
+                }
+            })
             ->join('roles', 'users.role_id', '=', 'roles.id')
             ->select('users.*', 'roles.name as role_name')
             ->paginate($request->per_page ?? 10);
@@ -49,7 +64,6 @@ class UserController extends ApiController
         $data = User::find($id);
         return $this->successResponse("Success", $data);
     }
-
 
     public function update($id, Request $request)
     {

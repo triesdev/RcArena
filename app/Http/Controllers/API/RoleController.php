@@ -84,7 +84,10 @@ class RoleController extends ApiController
 
     public function list()
     {
-        $data = Role::orderBy('name')->get();
+        $createable = env("ROLE_CREATEABLE");
+        $data = Role::orderBy('name')
+            ->whereIn('id', explode(",", $createable))
+            ->get();
         return $this->successResponse("Success", $data);
     }
 }

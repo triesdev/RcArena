@@ -29,30 +29,6 @@
                         <div class="dataTables_wrapper dt-bootstrap4 no-footer">
                             <div class="table-responsive">
                                 <Loading :active="is_loading" :loader="'dots'" :is-full-page="false" />
-                                <!-- <div class="p-3" v-for="menu in form_props.menu_role">
-                                    <div class="d-flex">
-                                        <div class="form-check form-check-sm form-check-custom form-check-solid">
-                                            <input class="form-check-input" type="checkbox" v-model="menu.selected"
-                                                value="1">
-                                        </div>
-                                        <div class="ms-2" style="font-weight: bold">
-                                            {{ menu.title }} <span class="text-gray-600 font-italic"
-                                                style="font-weight: normal">{{ menu.url }}</span>
-                                        </div>
-                                    </div>
-                                    <div v-if="menu.children" class="ms-10">
-                                        <div v-for="cld in menu.children" class="d-flex pt-3">
-                                            <div class="form-check form-check-sm form-check-custom form-check-solid">
-                                                <input class="form-check-input" type="checkbox" v-model="cld.selected"
-                                                    value="1">
-                                            </div>
-                                            <div class="ms-2" style="font-weight: bold">{{ cld.title }}
-                                                <span class="text-gray-600 font-italic" style="font-weight: normal">{{
-                                                    cld.url }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div> -->
                                 <table class="table" style="width: 100%;">
                                     <thead>
                                         <tr>
@@ -138,10 +114,15 @@ export default {
         const type_list = ["get", "show", "post", "put", "del"]
 
         function loadMenuRole(role_id) {
+            form_props.menu_role = []
+            is_loading.value = true
             getData('menu-role', { role_id: role_id })
                 .then((data) => {
                     form_props.menu_role = setChecked(data.result)
-                })
+                    is_loading.value = false
+                }).catch(()=>{
+                is_loading.value = false
+            })
         }
 
         function loadRoles() {
