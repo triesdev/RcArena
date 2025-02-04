@@ -24,6 +24,10 @@ use App\Http\Controllers\Panel\FirebaseController;
 use App\Http\Controllers\Panel\TransactionController as PanelTransactionController;
 
 Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () {
+
+    // Guest Mode
+    Route::get("guest/event-home", [EventController::class, "getEventHome"])->withoutMiddleware([ApiToken::class]);
+
     // Auth
     Route::post("login-sso", [AuthController::class, 'SSOLogin'])->withoutMiddleware([ApiToken::class]);
     Route::post("login", [AuthController::class, "Login"])->withoutMiddleware([ApiToken::class]);
