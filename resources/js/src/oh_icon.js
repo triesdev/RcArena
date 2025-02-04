@@ -20,6 +20,8 @@ import {
     BiTags,
     BiVectorPen,
     BiEye, BiWhatsapp, BiExclamation, BiExclamationCircleFill,
+    BiTicketDetailed,
+    BiPlus, BiTrash,
 } from "oh-vue-icons/icons/bi";
 
 addIcons(
@@ -44,7 +46,10 @@ addIcons(
   BiVectorPen,
   BiEye,
     BiWhatsapp,
-    BiExclamationCircleFill
+    BiExclamationCircleFill,
+    BiTicketDetailed,
+    BiPlus,
+    BiTrash,
 );
 
 // register components

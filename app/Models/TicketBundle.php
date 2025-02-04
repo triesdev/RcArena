@@ -13,6 +13,6 @@ class TicketBundle extends Model
 
     public function tickets()
     {
-        return $this->hasMany(Ticket::class, "bundle_id", "id");
+        return $this->hasMany(Ticket::class, "ticket_bundle_id", "id");
     }
 }

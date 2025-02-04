@@ -50,21 +50,10 @@
                                     <div class="grid grid-cols-2 gap-4 mt-4">
                                         <div class="col-span-2">
                                             <div class="form-group">
-                                                <label>Pilih Tiket</label>
-                                                <vSelect
-                                                    v-model="selectedTicket"
-                                                    :disabled="!form.event_id"
-                                                    :options="ticketProperties"
-                                                    @search="fetchTicketProperties"
-                                                    :reduce = "ticket => ticket.id"
-                                                    label="name"
-                                                    @update:modelValue="putTicketIdToDetail"
-                                                >
-                                                </vSelect>
+                                                <button @click="openTicketModal" :disabled="!form.event_id" class="btn btn-primary btn-sm flex items-center">
+                                                    <v-icon name="bi-ticket-detailed" class="mr-2"></v-icon> Pilih Tiket
+                                                </button>
                                             </div>
-                                            <span v-if="errorTicketExist" class="badge badge-danger">
-                                                Tiket sudah ada !
-                                            </span>
                                         </div>
                                     </div>
                                     <div id="detailOrders" class="grid grid-cols-2 gap-4 mt-4">
@@ -72,25 +61,44 @@
                                             <table class="w-100">
                                                 <thead>
                                                 <tr class="bg-gray-50">
-                                                    <th class="text-gray-600">Kelas</th>
-                                                    <th class="text-gray-600">Jenis Burung</th>
-                                                    <th class="text-gray-600 text-right">Qty</th>
-                                                    <th class="text-gray-600 text-right">Harga</th>
-                                                    <th class="text-gray-600 text-right">Subtotal</th>
+                                                    <th class="text-gray-600 text-center">Kelas</th>
+                                                    <th class="text-gray-60 text-center">Jenis Burung</th>
+                                                    <th width="10%" class="text-gray-600 text-center">Qty</th>
+                                                    <th class="text-gray-600 text-center">Harga</th>
+                                                    <th class="text-gray-600 text-center">Subtotal</th>
+                                                    <th class="text-gray-600 text-center">Aksi</th>
                                                 </tr>
                                                 </thead>
                                                 <tbody>
-                                                <tr class="p-2" v-if="form.details.length > 0" v-for="(detail, index) in form.details" :key="index">
-                                                    <td class="fw-normal py-2">{{detail.class_name}}</td>
-                                                    <td class="fw-normal py-2">{{detail.ticket_name}}</td>
-                                                    <td class="w-20 text-right py-2 font-normal flex items-center space-x-1 no-spinner">
-                                                        <button @click="decreaseQty(index)" class="px-2 py-1 text-white bg-gray-500 rounded-md hover:bg-gray-600">-</button>
-                                                        <input @keyup="updateQty(index)" type="number" v-model="detail.qty" class="w-12 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" min="1" />
-                                                        <button @click="increaseQty(index)" class="px-2 py-1 text-white bg-gray-500 rounded-md hover:bg-gray-600">+</button>
-                                                    </td>
-                                                    <td class="fw-normal py-2 text-right">{{ $filter.currency(detail.price) }}</td>
-                                                    <td class="fw-normal py-2 text-right">{{ $filter.currency(detail.subtotal_price) }}</td>
-                                                </tr>
+                                                <template v-if="form.details.length > 0" v-for="(detail, index) in form.details" :key="index">
+                                                    <tr class="p-2">
+                                                        <td v-if="detail.type == 'bundle'" colspan="2" class="fw-normal py-2">
+                                                            {{detail.ticket_name}} <span class="badge badge-sm badge-info">{{detail.type}}</span>
+                                                        </td>
+                                                        <td v-if="detail.type == 'piece'" class="fw-normal py-2">{{detail.class_name}}</td>
+                                                        <td v-if="detail.type == 'piece'" class="fw-normal py-2">{{detail.ticket_name}}</td>
+                                                        <td class="text-right py-2 font-normal flex items-center space-x-1 no-spinner">
+                                                            <button @click="decreaseQty(index)" class="px-2 py-1 text-white bg-gray-500 rounded-md hover:bg-gray-600 h-[2rem] w-[2rem]">-</button>
+                                                            <input @keyup="updateQty(index)" type="number" v-model="detail.qty" class="w-12 text-center border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" min="1" />
+                                                            <button @click="increaseQty(index)" class="px-2 py-1 text-white bg-gray-500 h-[2rem] w-[2rem] rounded-md hover:bg-gray-600">+</button>
+                                                        </td>
+                                                        <td class="fw-normal py-2 text-center">{{ $filter.currency(detail.price) }}</td>
+                                                        <td class="fw-normal py-2 text-center">{{ $filter.currency(detail.subtotal_price) }}</td>
+                                                        <td>
+                                                            <button @click="deleteTicket(index)" class="btn btn-sm btn-danger flex items-center justify-center w-1 h-[2rem]">
+                                                                <v-icon name="bi-trash"></v-icon>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                    <tr v-if="detail.tickets.length > 0" class="ticket-detail-tr" v-for="detail_ticket in detail.tickets" :key="`detail-ticket-${detail_ticket.id}`">
+                                                        <td class="p-2">
+                                                            {{detail_ticket.class_name}}
+                                                        </td>
+                                                        <td class="p-2">
+                                                            {{detail_ticket.ticket_name}}
+                                                        </td>
+                                                    </tr>
+                                                </template>
                                                 <tr class="p-2" v-else colspan="5">
                                                     <td class="text-center text-gray-700" colspan="5">Belum ada data</td>
                                                 </tr>
@@ -107,63 +115,30 @@
                                     <h3 class="fw-bold">Detail Pemesanan</h3>
                                     <div class="grid grid-cols-2 gap-4 mt-4">
                                         <div class="col-span-2">
-                                            <table class="w-100">
-                                                <tbody class="detail-table">
-                                                <tr>
-                                                    <td width="50%" class="text-gray-600">Event</td>
-                                                    <td>:</td>
-                                                    <td class="fw-bold">
-                                                        {{data_content.data_detail.event_name}}
-                                                    </td>
-                                                </tr>
-                                                </tbody>
-                                            </table>
-                                            <div id="detailTicket mt-4">
-                                                <div class="mt-2" v-for="item in data_content.data_detail.transaction_details">
-                                                    <span class="fw-bolder">{{item.name}}</span>
-                                                    <div class="ml-4">
-                                                        <table class="w-100">
-                                                            <tbody>
-                                                            <tr v-for="ticket in item.transaction_details">
-                                                                <td width="40%" class="fw-normal">
-                                                                    {{ticket.ticket_name}}
-                                                                </td>
-                                                                <td width="30%" class="fw-normal text-right">
-                                                                    {{ticket.qty}}x Tiket
-                                                                </td>
-                                                                <td width="30%" class="fw-normal text-right">
-                                                                    {{$filter.currency(ticket.subtotal_price)}}
-                                                                </td>
-                                                            </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <hr class="my-2" />
                                             <div id="summaryTransaction" class="fw-bold">
                                                 <div class="flex justify-between mb-2">
                                                     <span>Sub Total</span>
+                                                    <span class="mr-4">
+                                                        {{form.total_qty}}x Tiket
+                                                    </span>
                                                     <span>
-                                                        {{ $filter.currency(data_content.data_detail.subtotal_price) }}
+                                                        {{ $filter.currency(form.subtotal_price) }}
                                                     </span>
                                                 </div>
                                                 <div class="flex justify-between mb-2">
                                                     <span>Kode Unik</span>
                                                     <span>
-                                                        {{ $filter.currency(data_content.data_detail.unique_code_price) }}
+                                                        {{ $filter.currency(form.unique_code) }}
                                                     </span>
                                                 </div>
                                                 <div class="flex justify-between mb-2">
                                                     <span>Diskon</span>
-                                                    <span>
-                                                        {{ $filter.currency(data_content.data_detail.discount_price) }}
-                                                    </span>
+                                                    <input @keyup="syncTotal" type="number" min="0" class="border-gray-400 rounded-sm w-[5rem] text-right h-[2rem]" v-model="form.discount">
                                                 </div>
                                                 <div class="flex justify-between">
                                                     <span>Total</span>
                                                     <span>
-                                                        {{ $filter.currency(data_content.data_detail.total_price) }}
+                                                        {{ $filter.currency(form.total_price) }}
                                                     </span>
                                                 </div>
                                             </div>
@@ -192,6 +167,86 @@
                 </div>
             </div>
         </div>
+        <!-- Modal -->
+        <div class="modal fade" id="ticketModal" tabindex="-1" role="dialog" aria-labelledby="ticketModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 class="modal-title fw-bolder" id="ticketModalLabel">List Tiket :</h2>
+                    </div>
+                    <div class="modal-body">
+                        <Loading :active="form_props.is_loading_modal_tickets" :loader="'dots'" :is-full-page="false" />
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="col-span-2">
+                                <h2 class="fw-bold text-lg">
+                                   <v-icon name="bi-exclamation-circle-fill" class="text-primary"></v-icon> Tiket Bundle
+                                </h2>
+                                <table class="w-100">
+                                    <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="p-2" width="60%">Nama</th>
+                                        <th class="p-2">Harga</th>
+                                        <th class="p-2">Aksi</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template :key="ticket.id" v-for="ticket in ticketBundleProperties">
+                                            <tr>
+                                                <td class="p-2">{{ticket.ticket_bundle_name}}</td>
+                                                <td class="p-2">{{ $filter.currency(ticket.ticket_bundle_price) }}</td>
+                                                <td class="p-2">
+                                                    <button @click="putTicketIdToDetail(ticket.id, 'bundle')" class="btn btn-primary btn-sm flex items-center justify-center !w-[10px] !h-[10px]">
+                                                        <v-icon name="bi-plus"></v-icon>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <!-- Ticket Detail -->
+                                            <tr class="ticket-detail-tr" v-for="item in ticket.tickets" :key="`ticket-${item.id}`">
+                                                <td class="p-1 !pl-5" colspan="2">{{item.ticket_name}}<br><span class="badge badge-sm badge-info">{{ item.class_name }}</span></td>
+                                                <td>
+                                                    &nbsp;
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-span-2">
+                                <hr class="w-100">
+                            </div>
+                            <div class="col-span-2">
+                                <h2 class="fw-bold text-lg">
+                                    <v-icon name="bi-exclamation-circle-fill" class="text-primary"></v-icon> Tiket Satuan
+                                </h2>
+                                <table class="w-100">
+                                    <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="p-2" width="60%">Nama</th>
+                                        <th class="p-2">Harga</th>
+                                        <th class="p-2">Aksi</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="ticket in ticketPieceProperties" :key="ticket.id">
+                                        <td class="p-2">{{ticket.name}}</td>
+                                        <td class="p-2">{{ $filter.currency(ticket.price) }}</td>
+                                        <td class="p-2">
+                                            <button @click="putTicketIdToDetail(ticket.id, 'piece')" class="btn btn-primary btn-sm flex items-center justify-center !w-[10px] !h-[10px]">
+                                                <v-icon name="bi-plus"></v-icon>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" @click="closeTicketModal" class="btn btn-secondary">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 <style>
@@ -205,6 +260,11 @@ input::-webkit-inner-spin-button {
 /* Firefox */
 input[type=number] {
     -moz-appearance: textfield;
+}
+
+.ticket-detail-tr td, .ticket-detail-tr td span{
+    font-size: 12px !important;
+    font-weight: lighter;
 }
 </style>
 <script>
@@ -221,6 +281,7 @@ export default {
 
         const form_props = reactive({
             is_loading: false,
+            is_loading_modal_tickets: false,
             edit_mode: false,
         })
 
@@ -281,11 +342,13 @@ export default {
         }
 
         const ticketProperties = ref([]);
-        const fetchTicketProperties = debounce(async (ticket_name = '') => {
-            if (!ticket_name){
+        const ticketPieceProperties = ref([]);
+        const ticketBundleProperties = ref([]);
+        const fetchTicketProperties = debounce(async (ticket_name = '', first_load = false) => {
+            if (!ticket_name && !first_load){
                 return;
             }
-            form_props.is_loading = true;
+            form_props.is_loading_modal_tickets = true;
             try {
                 const params = {
                     ticket_name: ticket_name,
@@ -293,43 +356,92 @@ export default {
                 };
                 const response = await getData("ticket-properties", params);
                 ticketProperties.value = response.result;
+                ticketPieceProperties.value = response.result.ticket_pieces;
+                ticketBundleProperties.value = response.result.ticket_bundles;
             } catch (error) {
                 console.error("Failed to fetch ticket properties:", error);
             } finally {
-                form_props.is_loading = false;
+                form_props.is_loading_modal_tickets = false;
             }
         }, 500);
 
+        let ticketModal = ref(null);
         onMounted(() => {
             getEvents();
+            const modalElement = document.getElementById('ticketModal');
+            if (modalElement) {
+                ticketModal.value = new bootstrap.Modal(modalElement);
+            }
         });
 
         /*Handle Form*/
         const form = reactive({
             event_id: null,
             ticket_type: null,
-            details: []
+            total_price: 0,
+            discount: 0,
+            subtotal_price: 0,
+            unique_code: Math.floor(Math.random() * (500 - 100 + 1)) + 100,
+            total_qty: 0,
+            details: [],
+            ticket_piece_details: [],
+            ticket_bundle_details: [],
         });
 
         const selectedTicket = ref(null);
 
         const errorTicketExist = ref(false);
-        const putTicketIdToDetail = (val) => {
-            // Check If Exist return error
-            if (form.details.find(detail => detail.ticket_id === val)){
-                errorTicketExist.value = true;
-                return;
+        const putTicketIdToDetail = (val, type) => {
+            // Check If Exist with ID and TYPE return error
+            if (form.details.length > 0) {
+                if (form.details.find(detail => detail.id === val && detail.type === type)) {
+                    errorTicketExist.value = true;
+                    return;
+                }
             }
 
-            const ticket = ticketProperties.value.find(ticket => ticket.id === val);
+            if (type === 'bundle'){
+                handleBundleTicket(val);
+            } else {
+                handlePieceTicket(val);
+            }
 
+            syncTotal();
+        }
+
+        const handleBundleTicket = (val) => {
+            const item = ticketBundleProperties.value.find(ticket => ticket.id === val);
             const detail = {
-                ticket_id: ticket.id,
+                id: item.id,
+                class_name: "",
+                ticket_name: item.ticket_bundle_name,
+                qty: 1,
+                price: item.ticket_bundle_price,
+                subtotal_price: item.ticket_bundle_price,
+                type: 'bundle',
+                tickets: item.tickets.map((ticket) => {
+                    return {
+                        id: ticket.id,
+                        class_name: ticket.class_name,
+                        ticket_name: ticket.ticket_name,
+                        type: "piece"
+                    }
+                })
+            };
+            form.details.push(detail);
+        }
+
+        const handlePieceTicket = (val) => {
+            const ticket = ticketPieceProperties.value.find(ticket => ticket.id === val);
+            const detail = {
+                id: ticket.id,
                 class_name: ticket.class_name,
                 ticket_name: ticket.name,
                 qty: 1,
                 price: ticket.price,
-                subtotal_price: ticket.price
+                subtotal_price: ticket.price,
+                type: 'piece',
+                tickets: []
             };
             form.details.push(detail);
         }
@@ -357,7 +469,35 @@ export default {
         const updateSubtotal = (index) => {
             const detail = form.details[index];
             detail.subtotal_price = detail.qty * detail.price;
+            syncTotal();
         };
+
+        const openTicketModal = () => {
+            ticketModal.value.show();
+            fetchTicketProperties('', true);
+        }
+
+        const closeTicketModal = () => {
+            ticketModal.value.hide();
+        }
+
+        const deleteTicket = (index) => {
+            form.details.splice(index, 1);
+            syncTotal()
+        }
+
+        const syncTotal = () => {
+            let subtotal = 0;
+            let total_qty = 0;
+            form.details.forEach((detail) => {
+                subtotal += detail.subtotal_price;
+                total_qty += detail.qty;
+            });
+
+            form.total_qty  = total_qty;
+            form.subtotal_price = subtotal;
+            form.total_price = form.subtotal_price + form.unique_code - form.discount;
+        }
 
         return {
             title,
@@ -367,6 +507,8 @@ export default {
             form,
             eventProperties,
             ticketProperties,
+            ticketPieceProperties,
+            ticketBundleProperties,
             fetchTicketProperties,
             selectedTicket,
             putTicketIdToDetail,
@@ -374,6 +516,10 @@ export default {
             increaseQty,
             decreaseQty,
             updateQty,
+            deleteTicket,
+            openTicketModal,
+            closeTicketModal,
+            syncTotal
         };
     },
 }
