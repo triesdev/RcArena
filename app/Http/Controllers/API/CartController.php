@@ -20,6 +20,7 @@ class CartController extends ApiController
     private $response_ticket;
     private $ticket_stock_check;
     private $event_id;
+    private $message = null;
     // END ADD TO CART
 
     public function getCarts(Request $request)
@@ -30,7 +31,7 @@ class CartController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse("Errors", $validator->errors());
+            return $this->errorResponse($this->message ?? "Error", $validator->errors());
         }
 
         try {
@@ -40,10 +41,12 @@ class CartController extends ApiController
                 ->select("carts.*", "tickets.quota_left")->whereUserId($this->user->id)->where("carts.event_id",$event_id)->get();
 
 
+            $ticket_bundle_out_of_stock = false;
             $carts = $carts->map(function ($cart) {
                 //CHECK OUT OF STOCK
                 if ($cart->qty > $cart->quota_left) {
                     $cart->out_of_stock = true;
+                    $ticket_bundle_out_of_stock = true;
                 } else {
                     $cart->out_of_stock = false;
                 }
@@ -58,10 +61,10 @@ class CartController extends ApiController
 
             $ticket_bundles = TicketBundle::select("id as ticket_bundle_id","name","price")->whereIn('id', $cart_ticket_bundle_id)->get();
             if ($ticket_bundles->count() > 0) {
-                $ticket_bundles = $ticket_bundles->map(function ($ticket_bundle) use ($carts) {
+                $ticket_bundles = $ticket_bundles->map(function ($ticket_bundle) use ($carts, $ticket_bundle_out_of_stock) {
                     $ticket_bundle->bundle_qty = $carts->where('ticket_bundle_id', $ticket_bundle->ticket_bundle_id)->first()->qty;
+                    $ticket_bundle->out_of_stock = $ticket_bundle_out_of_stock;
                     $ticket_bundle->tickets = $carts->where('ticket_bundle_id', $ticket_bundle->ticket_bundle_id)->flatten();
-
                     return $ticket_bundle;
                 });
             }
@@ -119,17 +122,20 @@ class CartController extends ApiController
                 $this->bundleToCart($tickets);
             } else {
                 // Validation if ticket id is bundle but wrong type
-                $ticket = Ticket::find($ticket_id);
-                if ($ticket->ticket_bundle_id) {
-                    DB::rollBack();
-                    return $this->errorResponse("Ticket is bundle type");
+                $ids = explode(",", $ticket_id);
+                foreach ($ids as $id){
+                    $ticket = Ticket::find($id);
+                    if ($ticket->ticket_bundle_id) {
+                        DB::rollBack();
+                        return $this->errorResponse("Ticket is bundle type");
+                    }
+                    $this->pieceToCart($ticket);
                 }
-                $this->pieceToCart($ticket);
             }
 
             if (count($this->ticket_stock_check) > 0) {
                 DB::rollBack();
-                return $this->errorResponse("Errors", $this->ticket_stock_check);
+                return $this->errorResponse("Errors",);
             }
 
             DB::commit();
@@ -161,6 +167,7 @@ class CartController extends ApiController
                 'ticket_id' => $ticket->id,
                 'message' => 'Ticket out of stock',
             ];
+            $this->message = 'Ticket out of stock';
             return;
         }
 
@@ -258,7 +265,7 @@ class CartController extends ApiController
 
             if (count($this->ticket_stock_check) > 0) {
                 DB::rollBack();
-                return $this->errorResponse("Errors", $this->ticket_stock_check);
+                return $this->errorResponse($this->message ?? "Errors");
             }
 
             DB::commit();
@@ -293,12 +300,14 @@ class CartController extends ApiController
             } else {
                 $cart->qty = $type == 'add' ? $cart->qty + 1 : $cart->qty - 1;
             }
+            $cart->qty = (int) $cart->qty;
 
             if ($cart->qty > $cart->quota_left) {
                 $this->ticket_stock_check[] = [
                     'ticket_id' => $cart->ticket_id,
                     'message' => 'Ticket out of stock',
                 ];
+                $this->message = 'Ticket out of stock';
             } else if ($cart->qty == 0) {
                 $this->response_ticket[] = $cart;
                 // DELETE CART
@@ -330,11 +339,14 @@ class CartController extends ApiController
         } else {
             $cart->qty = $type == 'add' ? $cart->qty + 1 : $cart->qty - 1;
         }
+        $cart->qty = (int) $cart->qty;
+
         if ($cart->qty > $ticket->quota_left) {
             $this->ticket_stock_check[] = [
                 'ticket_id' => $ticket_id,
                 'message' => 'Ticket out of stock',
             ];
+            $this->message = 'Ticket out of stock';
         } else if ($cart->qty == 0) {
                 $this->response_ticket[] = $cart;
                 // DELETE CART
