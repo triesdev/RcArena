@@ -12,11 +12,11 @@
         <div class="app-content flex-column-fluid">
             <div class="app-container container-xxl">
                 <Loading :active="form_props.is_loading" :loader="'dots'" :is-full-page="false" />
-                <div class="grid grid-cols-3 gap-4">
-                    <div class="col-span-2 md:col-span-2">
+                <div class="grid grid-cols-1 md:grid-cols-[78%_22%] gap-4">
+                    <div>
                         <div class="card mb-4 card-flush">
                             <div class="card-body">
-                                <div >
+                                <div>
                                     <h2 class="fw-bold">Detail Tiket</h2>
                                     <div class="grid grid-cols-2 gap-4 mt-4">
                                         <div class="col-span-2">
@@ -99,8 +99,8 @@
                                                         </td>
                                                     </tr>
                                                 </template>
-                                                <tr class="p-2" v-else colspan="5">
-                                                    <td class="text-center text-gray-700" colspan="5">Belum ada data</td>
+                                                <tr class="p-4" v-else colspan="5">
+                                                    <td class="text-center text-gray-700 p-4" colspan="6">Belum ada data</td>
                                                 </tr>
                                                 </tbody>
                                             </table>
@@ -147,19 +147,30 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="w-100 mt-2 flex justify-end">
+                            <button class="btn btn-sm btn-primary fw-bold flex items-center p-2 h-[2.5rem]">
+                                <v-icon name="bi-save" class="mr-2"></v-icon>Buat Pesanan
+                            </button>
+                        </div>
                     </div>
-                    <div class="col-span-1 md:col-span-1">
+                    <div>
                         <div class="card card-flush">
-                            <div v-if="data_content.data_detail.user" class="card-body">
+                            <div class="card-body">
                                 <h3 class="fw-bold">Detail Pemesan</h3>
-                                <div class="mt-4">
-                                    <img :src="`${data_content.data_detail.user.image_uri ?? '/assets/default-profile.jpg'}`" alt="Profile Image" class="rounded w-full h-fit">
-                                </div>
-                                <div class="mt-4">
-                                    <h4 class="fw-bold">Nama</h4>
-                                    <p>{{data_content.data_detail.user.name}}</p>
-                                    <h4 class="mt-2 fw-bold">No Whatsapp</h4>
-                                    <p>{{data_content.data_detail.user.phone_number}}</p>
+                                <input v-model="user_code_orderer" class="form-control mt-4 h-[2.5rem]" placeholder="Masukkan ID Pemesan">
+                                <button @click="checkUser" class="btn btn-sm btn-primary h-[2.5rem] mt-2 justify-center flex items-center p-0 w-100">
+                                    <v-icon name="bi-search" class="mr-2"></v-icon> Cek ID Pemesan
+                                </button>
+                                <div v-if="user_check_data" class="mt-2" >
+                                    <div class="mt-4">
+                                        <img :src="`${user_check_data.image_uri ?? '/assets/default-profile.jpg'}`" alt="Profile Image" class="rounded w-full h-fit">
+                                    </div>
+                                    <div class="mt-4">
+                                        <h4 class="fw-bold">Nama</h4>
+                                        <p>{{user_check_data.name}}</p>
+                                        <h4 class="mt-2 fw-bold">No Whatsapp</h4>
+                                        <p>{{user_check_data.phone_number}}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -277,7 +288,7 @@ import { debounce } from 'lodash';
 export default {
     setup(){
         const {getData} = useAxios();
-        const title = "Detail Pemesanan";
+        const title = "Buat Pesanan Baru";
 
         const form_props = reactive({
             is_loading: false,
@@ -377,6 +388,7 @@ export default {
         /*Handle Form*/
         const form = reactive({
             event_id: null,
+            user_id: null,
             ticket_type: null,
             total_price: 0,
             discount: 0,
@@ -499,6 +511,20 @@ export default {
             form.total_price = form.subtotal_price + form.unique_code - form.discount;
         }
 
+        const user_check_data = ref(null)
+        const user_code_orderer = ref(null)
+        const checkUser = async () => {
+            form_props.is_loading = true;
+            try {
+                const response = await getData("users/get-by-code/" + user_code_orderer.value);
+                user_check_data.value = response.result;
+            } catch (error) {
+                console.error("Failed to fetch user data:", error);
+            } finally {
+                form_props.is_loading = false;
+            }
+        }
+
         return {
             title,
             breadcrumb_list,
@@ -519,7 +545,10 @@ export default {
             deleteTicket,
             openTicketModal,
             closeTicketModal,
-            syncTotal
+            syncTotal,
+            user_check_data,
+            user_code_orderer,
+            checkUser
         };
     },
 }

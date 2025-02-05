@@ -65,6 +65,12 @@ class UserController extends ApiController
         return $this->successResponse("Success", $data);
     }
 
+    public function getByCode($code)
+    {
+        $data = User::where('user_code', $code)->first();
+        return $this->successResponse("Success", $data);
+    }
+
     public function update($id, Request $request)
     {
         $validator = Validator::make($request->all(), [

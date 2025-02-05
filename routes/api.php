@@ -75,6 +75,7 @@ Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], functio
 
     // Account
     Route::resource("users", UserController::class);
+    Route::get("users/get-by-code/{code}", [UserController::class, "getByCode"]);
     Route::resource("roles", RoleController::class);
     Route::resource("menus", MenuController::class);
     Route::resource("menu-role", MenuRoleController::class);
