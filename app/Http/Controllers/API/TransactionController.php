@@ -195,7 +195,7 @@ class TransactionController extends ApiController
         return $this->successResponse("Success", $transaction);
     }
 
-    private function generateInvoiceNumberTransactions(){
+    public function generateInvoiceNumberTransactions(){
         // Generate Invoice Number LIKE (INV/2024/V/00001)
         $year = date('Y');
         $month = date('m');
@@ -223,8 +223,5 @@ class TransactionController extends ApiController
         return $map[(int)$month];
     }
 
-    public function getTicketTransactionDetailUsers()
-    {
 
-    }
 }

@@ -11,8 +11,9 @@
         </div>
         <div class="app-content flex-column-fluid">
             <div class="app-container container-xxl">
-                <Loading :active="form_props.is_loading" :loader="'dots'" :is-full-page="false" />
-                <div class="grid grid-cols-1 md:grid-cols-[78%_22%] gap-4">
+<!--                <Loading :active="form_props.is_loading" :loader="'dots'" :is-full-page="false" />-->
+                <Loading :active="false" :loader="'dots'" :is-full-page="false" />
+                <div class="grid grid-cols-1 lg:grid-cols-[70%_30%] xl:grid-cols-[78%_22%] gap-4">
                     <div>
                         <div class="card mb-4 card-flush">
                             <div class="card-body">
@@ -29,6 +30,7 @@
                                                     :disabled="form.details.length > 0"
                                                     label="name">
                                                 </vSelect>
+                                                {{getMessage('event_id')}}
                                             </div>
                                         </div>
                                     </div>
@@ -39,12 +41,15 @@
                                                 <vSelect
                                                     v-model="form.ticket_type"
                                                     :options="[
-                                                        'Regular',
-                                                        'Community'
+                                                        { value: 'regular', text: 'Regular' },
+                                                        { value: 'community', text: 'Community' }
                                                     ]"
+                                                    :reduce="option => option.value"
+                                                    label="text"
                                                     >
                                                 </vSelect>
                                             </div>
+                                            {{getMessage('ticket_type')}}
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-2 gap-4 mt-4">
@@ -54,6 +59,7 @@
                                                     <v-icon name="bi-ticket-detailed" class="mr-2"></v-icon> Pilih Tiket
                                                 </button>
                                             </div>
+                                            {{getMessage('details')}}
                                         </div>
                                     </div>
                                     <div id="detailOrders" class="grid grid-cols-2 gap-4 mt-4">
@@ -73,9 +79,16 @@
                                                 <template v-if="form.details.length > 0" v-for="(detail, index) in form.details" :key="index">
                                                     <tr class="p-2">
                                                         <td v-if="detail.type == 'bundle'" colspan="2" class="fw-normal py-2">
-                                                            {{detail.ticket_name}} <span class="badge badge-sm badge-info">{{detail.type}}</span>
+                                                            {{detail.ticket_name}} <span class="badge badge-sm badge-info">{{detail.type.toUpperCase()}}</span><br>
+                                                            <span class="fw-bolder text-xs badge badge-sm badge-danger" v-if="getStatus(`details.${detail.id}.${detail.type}`)">
+                                                                Out Of Stock !
+                                                            </span>
                                                         </td>
-                                                        <td v-if="detail.type == 'piece'" class="fw-normal py-2">{{detail.class_name}}</td>
+                                                        <td v-if="detail.type == 'piece'" class="fw-normal py-2">{{detail.class_name}}
+                                                            <span class="fw-bolder text-xs badge badge-sm badge-danger" v-if="getStatus(`details.${detail.id}.${detail.type}`)">
+                                                                Out Of Stock !
+                                                            </span>
+                                                        </td>
                                                         <td v-if="detail.type == 'piece'" class="fw-normal py-2">{{detail.ticket_name}}</td>
                                                         <td class="text-right py-2 font-normal flex items-center space-x-1 no-spinner">
                                                             <button @click="decreaseQty(index)" class="px-2 py-1 text-white bg-gray-500 rounded-md hover:bg-gray-600 h-[2rem] w-[2rem]">-</button>
@@ -148,7 +161,7 @@
                             </div>
                         </div>
                         <div class="w-100 mt-2 flex justify-end">
-                            <button class="btn btn-sm btn-primary fw-bold flex items-center p-2 h-[2.5rem]">
+                            <button @click="storeTransaction" class="btn btn-sm btn-primary fw-bold flex items-center p-2 h-[2.5rem]">
                                 <v-icon name="bi-save" class="mr-2"></v-icon>Buat Pesanan
                             </button>
                         </div>
@@ -158,6 +171,7 @@
                             <div class="card-body">
                                 <h3 class="fw-bold">Detail Pemesan</h3>
                                 <input v-model="user_code_orderer" class="form-control mt-4 h-[2.5rem]" placeholder="Masukkan ID Pemesan">
+                                {{getMessage('user_id')}}
                                 <button @click="checkUser" class="btn btn-sm btn-primary h-[2.5rem] mt-2 justify-center flex items-center p-0 w-100">
                                     <v-icon name="bi-search" class="mr-2"></v-icon> Cek ID Pemesan
                                 </button>
@@ -279,15 +293,15 @@ input[type=number] {
 }
 </style>
 <script>
-import {container as WidgetContainerModal} from "jenesius-vue-modal";
-import Breadcrumb from "../../components/Breadcrumb.vue";
 import {reactive, ref, onMounted} from "vue";
 import useAxios from "../../src/service.js";
 import { debounce } from 'lodash';
+import useValidation from "../../src/validation";
 
 export default {
     setup(){
-        const {getData} = useAxios();
+        const {getData, basePostData} = useAxios();
+        const { setErrors, getMessage, resetErrors, getStatus, removeError } = useValidation()
         const title = "Buat Pesanan Baru";
 
         const form_props = reactive({
@@ -301,42 +315,6 @@ export default {
             {name: "Pemesanan", link: "/panel/transactions"},
             {name: "Detail Pemesanan", link: "/panel/transactions/detail"}
         ];
-
-        const data_content = reactive({
-            data_detail: {
-                transaction_number: "TRX-0001",
-                transaction_date: "2021-12-12",
-                total_price: 100000,
-                payment: {
-                    payment_status: "new",
-                    account_name: "John Doe",
-                    payment_date: "2021-12-12",
-                    payment_proof_image_uri: "https://via.placeholder.com/150",
-                    note: "Pembayaran sudah dilakukan"
-                },
-                event_name: "Event Test",
-                transaction_details: [
-                    {
-                        name: "Tiket VIP",
-                        transaction_details: [
-                            {
-                                ticket_name: "Tiket VIP",
-                                qty: 1,
-                                subtotal_price: 100000
-                            }
-                        ]
-                    }
-                ],
-                subtotal_price: 100000,
-                unique_code_price: 0,
-                discount_price: 0,
-                user: {
-                    image_uri: "https://via.placeholder.com/150",
-                    name: "John Doe",
-                    phone_number: "08123456789"
-                }
-            }
-        });
 
         // Get Events
         const eventProperties = ref([]);
@@ -396,8 +374,6 @@ export default {
             unique_code: Math.floor(Math.random() * (500 - 100 + 1)) + 100,
             total_qty: 0,
             details: [],
-            ticket_piece_details: [],
-            ticket_bundle_details: [],
         });
 
         const selectedTicket = ref(null);
@@ -494,6 +470,8 @@ export default {
         }
 
         const deleteTicket = (index) => {
+            const data_detail = form.details[index];
+            removeError(`details.${data_detail.id}.${data_detail.type}`);
             form.details.splice(index, 1);
             syncTotal()
         }
@@ -517,19 +495,78 @@ export default {
             form_props.is_loading = true;
             try {
                 const response = await getData("users/get-by-code/" + user_code_orderer.value);
-                user_check_data.value = response.result;
+                if (response.result) {
+                    user_check_data.value = response.result;
+                    form.user_id = response.result.id;
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'User Not Found',
+                        text: 'No user found with the provided ID.',
+                    });
+                    form_props.is_loading = false;
+                }
             } catch (error) {
                 console.error("Failed to fetch user data:", error);
+                form_props.is_loading = false;
             } finally {
                 form_props.is_loading = false;
             }
         }
 
+        const storeTransaction = async () => {
+            resetErrors();
+            form_props.is_loading = true;
+            try {
+                const response = await basePostData("transactions", form);
+                if (response.status === 201) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Transaction has been created successfully.',
+                    }).then(() => {
+                        window.location.href = "/panel/transactions";
+                    });
+                } else {
+                    setErrors(response.errors);
+                }
+            } catch (error) {
+                let formattedErrors = {};
+
+                if (error.response && error.response.data) {
+                    if (error.response.data.message === 'error_stocks') {
+                        const errors = error.response.data.errors;
+
+                        errors.forEach((error) => {
+                            const detailIndex = form.details.findIndex(
+                                (detail) => detail.id === error.id_ticket && detail.type === error.type
+                            );
+
+                            if (detailIndex !== -1) {
+                                if (!formattedErrors[`details.${form.details[detailIndex].id}.${form.details[detailIndex].type}`]) {
+                                    formattedErrors[`details.${form.details[detailIndex].id}.${form.details[detailIndex].type}`] = [];
+                                }
+
+                                formattedErrors[`details.${form.details[detailIndex].id}.${form.details[detailIndex].type}`].push(error.message);
+                            }
+                        });
+                    } else {
+                        formattedErrors = error.response.data.errors;
+                    }
+                } else {
+                    formattedErrors.general = ["An unexpected error occurred."];
+                }
+
+                setErrors(formattedErrors);
+            } finally {
+                form_props.is_loading = false;
+            }
+        };
+
         return {
             title,
             breadcrumb_list,
             form_props,
-            data_content,
             form,
             eventProperties,
             ticketProperties,
@@ -548,7 +585,10 @@ export default {
             syncTotal,
             user_check_data,
             user_code_orderer,
-            checkUser
+            checkUser,
+            storeTransaction,
+            getMessage,
+            getStatus
         };
     },
 }

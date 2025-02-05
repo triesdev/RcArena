@@ -7,6 +7,7 @@ export default function useValidation() {
 
     function getStatus(field) {
         const errors = state.errors
+        console.log(errors[field],'errors field')
         return errors[field] !== undefined
     }
 
@@ -22,6 +23,13 @@ export default function useValidation() {
         state.errors = errors
     }
 
+    // Remove a specific error field from the errors object
+    const removeError = (field) => {
+        if (state.errors[field]) {
+            delete state.errors[field];
+        }
+    };
+
     function resetErrors() {
         state.errors = []
     }
@@ -30,6 +38,7 @@ export default function useValidation() {
         getStatus,
         getMessage,
         setErrors,
-        resetErrors
+        resetErrors,
+        removeError
     }
 }
