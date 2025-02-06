@@ -66,6 +66,12 @@ export default function useAxios() {
         }
     }
 
+    async function basePostData(url, data) {
+        return await axios.post(base_url + url, data, {
+            headers: setHeader()
+        });
+    }
+
     async function patchData(url, data) {
         try {
             const response = await axios.patch(base_url + url, data, {
@@ -102,5 +108,6 @@ export default function useAxios() {
         postData,
         patchData,
         deleteData,
+        basePostData
     };
 }

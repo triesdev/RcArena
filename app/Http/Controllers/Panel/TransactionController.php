@@ -7,15 +7,20 @@ use App\Http\Controllers\Controller;
 use App\Http\Repository\TransactionRepository;
 use App\Models\Payment;
 use App\Models\Ticket;
+use App\Models\TicketBundle;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Models\TransactionDetailUser;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use PHPUnit\Util\Exception;
 
 class TransactionController extends ApiController
 {
+    protected $stock_errors = [];
+
     /**
      * Display a listing of the resource.
      *
@@ -167,7 +172,182 @@ class TransactionController extends ApiController
      */
     public function store(Request $request)
     {
-        //
+        $validation = Validator::make($request->all(), [
+            'event_id'      => 'required|integer|exists:events,id',
+            'user_id'       => 'required|integer|exists:users,id',
+            'ticket_type'   => 'required|string|in:regular,community',
+            'total_price'   => 'required|numeric|min:0',
+            'discount'      => 'required|numeric|min:0',
+            'subtotal_price'=> 'required|numeric|min:0',
+            'unique_code'   => 'required|integer|min:100|max:999',
+            'total_qty'     => 'required|integer|min:0',
+            'details' => 'array|min:1',
+            'details.*.type'         => 'required|string|in:bundle,piece',
+            'details.*.qty'          => 'required|integer|min:1',
+            'details.*.price'        => 'required|numeric|min:0',
+            'details.*.subtotal_price' => 'required|numeric|min:0',
+        ]);
+
+        if ($validation->fails()) {
+            return $this->validationErrorResponse($validation->errors()->first(), $validation->errors());
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $user = User::find($request->user_id);
+            // Payment Limit Date + 15Menit
+            $payment_limt_date = now()->addMinutes(15);
+            $transaction_api_controller = new \App\Http\Controllers\API\TransactionController();
+            $transaction = Transaction::create([
+                'event_id'      => $request->event_id,
+                'user_id'       => $request->user_id,
+                'user_name'     => $user->name,
+                'transaction_date' => now(),
+                'transaction_number' => $transaction_api_controller->generateInvoiceNumberTransactions(),
+                'total_price'   => $request->total_price,
+                'discount_price'      => $request->discount,
+                'subtotal_price'=> $request->subtotal_price,
+                'unique_code_price'   => $request->unique_code,
+                'transaction_status' => 'unpaid',
+                'payment_limit_date' => $payment_limt_date,
+                'is_from_panel' => 1
+            ]);
+
+            $data_details_bundle = collect($request->details)->where("type","bundle");
+            // Get The ids
+            if ($data_details_bundle->count() > 0) {
+                $ticket_bundle_ids = $data_details_bundle->pluck('id')->toArray();
+                $ticket_bundles = TicketBundle::whereIn('id', $ticket_bundle_ids)->get();
+            }
+
+            $transaction_details = [];
+            foreach ($request->details as $detail) {
+                // Bundle
+                if ($detail['type'] == 'bundle') {
+                    $ticket_bundle_id = $detail['id'];
+                    $ticket_bundle = $ticket_bundles->where('id', $ticket_bundle_id)->first();
+                    $qty = $detail['qty'];
+                    foreach ($detail['tickets'] as $bundle) {
+                        if (!$ticket_bundle) {
+                            DB::rollBack();
+                            return $this->errorResponse('Ticket bundle not found');
+                        }
+
+                        $transaction_detail = TransactionDetail::create([
+                            'transaction_id' => $transaction->id,
+                            'ticket_bundle_id' => $ticket_bundle_id,
+                            'ticket_id' => $bundle['id'],
+                            'ticket_bundle_name' => $ticket_bundle->name,
+                            'qty'            => $qty,
+                            'price'          => $detail['price'],
+                            'subtotal_price' => $detail['subtotal_price'],
+                            'user_id' => $request->user_id,
+                            'user_code' => $user->user_code,
+                            'user_name' => $user->name,
+                        ]);
+
+                        array_push($transaction_details, $transaction_detail);
+                    }
+                } else {
+                    // Piece
+                    $transaction_detail = TransactionDetail::create([
+                        'transaction_id' => $transaction->id,
+                        'ticket_bundle_id' => null,
+                        'ticket_id'      => $detail['id'],
+                        'ticket_bundle_name' => null,
+                        'user_name'      => $user->name,
+                        'user_id'        => $request->user_id,
+                        'user_code'      => $user->user_code,
+                        'qty'            => $detail['qty'],
+                        'price'          => $detail['price'],
+                        'subtotal_price' => $detail['subtotal_price'],
+                    ]);
+
+                    array_push($transaction_details, $transaction_detail);
+                }
+            }
+
+            // Handle QTY Stock Tickets
+            $this->stock_errors = [];
+            $this->handleStockTickets($transaction->id, $request->details);
+            if (count($this->stock_errors) > 0) {
+                DB::rollBack();
+                return $this->errorResponse('error_stocks', $this->stock_errors);
+            }
+
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage());
+        }
+
+        $response = [
+            'transaction' => $transaction,
+            'transaction_details' => $transaction_details
+        ];
+        return $this->createSuccessResponse('Transaction success', $response);
+    }
+
+    private function handleStockTickets($transaction_id, $details)
+    {
+        try {
+            // Pluck Ticket Id on Detail Bundle And Pice
+            $ticket_ids = [];
+            foreach ($details as $detail) {
+                if ($detail['type'] == 'bundle') {
+                    foreach ($detail['tickets'] as $bundle) {
+                        $ticket_ids[] = $bundle['id'];
+                    }
+                } else {
+                    $ticket_ids[] = $detail['id'];
+                }
+            }
+
+            // Sort ID Array ASC
+            sort($ticket_ids);
+
+            // Lock Ticket by Ids Sorten By ASC
+            $tickets = Ticket::whereIn('id', $ticket_ids)->lockForUpdate()->get();
+
+            foreach ($details as $detail) {
+                if ($detail['type'] == 'bundle') {
+                    foreach ($detail['tickets'] as $bundle) {
+                        $ticket = $tickets->where('id', $bundle['id'])->first();
+                        $ticket->quota_left = $ticket->quota_left - $detail['qty'];
+
+                        // If Quota Left < 0
+                        if ($ticket->quota_left < 0) {
+                            $this->stock_errors[] = [
+                                'message' => 'Out of stock',
+                                'id_ticket' => $detail['id'],
+                                'type' => 'bundle'
+                            ];
+                            continue;
+                        }
+
+                        $ticket->save();
+                    }
+                } else {
+                    $ticket = $tickets->where('id', $detail['id'])->first();
+                    $ticket->quota_left = $ticket->quota_left - $detail['qty'];
+
+                    // If Quota Left < 0
+                    if ($ticket->quota_left < 0) {
+                        $this->stock_errors[] = [
+                            'message' => 'Out of stock',
+                            'id_ticket' => $ticket['id'],
+                            'type' => 'piece'
+                        ];
+                        continue;
+                    }
+
+                    $ticket->save();
+                }
+            }
+        } catch (\Exception $e) {
+           throw new Exception($e->getMessage());
+        }
     }
 
     /**

@@ -42,6 +42,7 @@ const routes = [
 
             // Transaction Details
             { path: 'transactions', component: Transactions, meta: { protected: true, title: "Transactions" } },
+            { path: 'add-transactions', component: TransactionAdd, meta: { protected: true, title: "Add Transaction" } },
             { path: 'transaction-detail/:id', component: TransactionsDetail, meta: { protected: true, title: "Transaction Detail" } },
 
             { path: 'events', component: Event, meta: { protected: true, title: "Events" } },
