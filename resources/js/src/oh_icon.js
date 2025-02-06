@@ -21,7 +21,7 @@ import {
     BiVectorPen,
     BiEye, BiWhatsapp, BiExclamation, BiExclamationCircleFill,
     BiTicketDetailed,
-    BiPlus, BiTrash, BiSave,
+    BiPlus, BiTrash, BiSave, BiCash,
 } from "oh-vue-icons/icons/bi";
 
 addIcons(
@@ -51,6 +51,7 @@ addIcons(
     BiPlus,
     BiTrash,
     BiSave,
+    BiCash
 );
 
 // register components

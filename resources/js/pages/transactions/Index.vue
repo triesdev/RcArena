@@ -12,19 +12,24 @@
         </div>
         <div class="app-content flex-column-fluid">
             <div class="app-container container-xxl">
+                <div class="flex w-100 justify-end">
+                    <router-link to="/panel/add-transactions" class="btn btn-primary btn-sm mb-3 w-[14rem] justify-center flex">
+                        <v-icon name="bi-plus"></v-icon> Tambah Data
+                    </router-link>
+                </div>
                 <div class="card card-flush">
                     <div class="py-6 px-8">
                         <div class="row">
                             <div class="col-md-3">
                                 <input type="text" class="form-control" placeholder="Cari.."
-                                    @keyup.enter="loadDataContent()" v-model="transaction_store.user_name">
+                                    v-model="transaction_store.transaction_number">
                             </div>
                             <div class="col-md-3">
                                 <VueCtkDateTimePicker v-model="transaction_store.dates" v-bind="date_config">
                                 </VueCtkDateTimePicker>
                             </div>
                             <div class="col-md-3">
-                                <select class="form-control" @change="loadDataContent()"
+                                <select class="form-control"
                                     v-model="transaction_store.status">
                                     <option value="">Semua</option>
                                     <option value="unpaid">Belum Bayar</option>
@@ -32,6 +37,11 @@
                                     <option value="success">Sudah Bayar</option>
                                     <option value="reject">Batal</option>
                                 </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-primary btn-sm" @click="loadDataContent">
+                                    <v-icon name="bi-search" class="mr-2"></v-icon> Cari
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -65,6 +75,10 @@
                                                 {{ data.transaction_number }}
                                                 <div class="text-sm">{{ $filter.formatDateTime(data.transaction_date) }}
                                                 </div>
+                                                <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-gray-500/10 ring-inset"
+                                                v-if="data.is_from_panel === 1">
+                                                    PANEL
+                                                </span>
                                             </td>
                                             <td>
                                                 <div class="d-flex align-items-center">
@@ -109,6 +123,10 @@
                                                 <button @click="notifWa(data.id)"
                                                     class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
                                                     <v-icon name="bi-whatsapp"></v-icon>
+                                                </button>
+                                                <button v-if="data.is_from_panel === 1 && data.transaction_status === 'unpaid'" @click="deleteModal(data.id)"
+                                                        class="btn btn-icon btn-bg-light btn-active-color-primary btn-sm me-1">
+                                                    <v-icon name="bi-trash"></v-icon>
                                                 </button>
                                             </td>
                                         </tr>
@@ -184,7 +202,7 @@ export default {
         }
 
         async function deleteModal(id) {
-            const delete_modal = await promptModal(DeleteModal, { title: "Hapus data?" })
+            const delete_modal = await promptModal(DeleteModal, { title: "Konfirmasi Hapus Data" })
             if (delete_modal) {
                 deleteData('transactions/' + id)
                     .then((data) => {
@@ -197,6 +215,8 @@ export default {
         function setDefaultImage(event) {
             event.target.src = '/assets/default-profile.jpg';
         }
+
+        date_config.format = "YYYY-MM-DD HH:mm"
 
         return {
             breadcrumb_list,

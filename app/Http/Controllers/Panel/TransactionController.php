@@ -26,7 +26,7 @@ class TransactionController extends ApiController
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $transactions = Transaction::with('user')
             ->leftJoin('events', 'transactions.event_id', '=', 'events.id')
@@ -34,6 +34,18 @@ class TransactionController extends ApiController
             ->orderBy('transactions.created_at', 'desc')
             ->select('transactions.*', 'events.name as event_name',DB::raw('SUM(transaction_details.qty) as total_qty'))
             ->groupBy('transactions.id')
+            // Filter
+            ->when($request->status, function ($q) use ($request) {
+                return $q->where('transaction_status', $request->status);
+            })
+            ->when($request->transaction_number, function ($q) use ($request) {
+                return $q->where('transaction_number', 'like', '%'.$request->transaction_number.'%');
+            })
+            ->when($request->dates, function ($q) use ($request) {
+                $dates = json_decode($request->dates);
+                return $q->whereBetween('transaction_date', [$dates->start, $dates->end]);
+            })
+
             ->paginate(10);
 
         return $this->successResponse('Transaction list', $transactions);
@@ -210,6 +222,7 @@ class TransactionController extends ApiController
                 'subtotal_price'=> $request->subtotal_price,
                 'unique_code_price'   => $request->unique_code,
                 'transaction_status' => 'unpaid',
+                'transaction_type' => $request->ticket_type,
                 'payment_limit_date' => $payment_limt_date,
                 'is_from_panel' => 1
             ]);
@@ -398,6 +411,25 @@ class TransactionController extends ApiController
      */
     public function destroy($id)
     {
-        //
+        $transaction = Transaction::find($id);
+
+        if (!$transaction) {
+            return $this->errorResponse('Transaction not found');
+        }
+
+        DB::beginTransaction();
+        try {
+            // Rollback Stock
+            $this->rollbackStock($id);
+
+            // Delete Transaction
+            $transaction->delete();
+
+            DB::commit();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse($e->getMessage());
+        }
     }
 }

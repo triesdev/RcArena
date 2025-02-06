@@ -1,10 +1,12 @@
 <template>
     <div class="card p-5">
         <div class="border-bottom-1 border-bottom pb-3">
-            <h3 class="mb-0">{{ title }}</h3>
+            <h3 class="mb-0 text-danger fw-bolder flex items-center">
+                <v-icon name="bi-exclamation-circle-fill" class="mr-2"></v-icon> {{ title }}
+            </h3>
         </div>
         <div class="py-3 w-200px w-md-300px w-lg-400px">
-<!--            Ini adalah isi-->
+            <p>Apakah anda yakin ingin menghapus data ini?</p>
         </div>
         <div class="text-end">
             <button class="btn btn-secondary mx-2 btn-sm" @click="decline">

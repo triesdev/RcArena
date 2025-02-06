@@ -66,6 +66,13 @@ class MenuSeed extends Seeder
                 ]
             ],
             [
+                'title'    => "Payment Method",
+                'icon'     => "bi-cash",
+                'url'      => "/panel/payments",
+                'type'     => "menu",
+                'children' => []
+            ],
+            [
                 'title'    => "User",
                 'icon'     => "bi-shield-check",
                 'url'      => "/panel/users--",
