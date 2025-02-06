@@ -39,7 +39,8 @@ class CartController extends ApiController
             $this->user = $request->auth_user;
             $event_id = $request->input('event_id');
             $carts = Cart::leftJoin("tickets", "carts.ticket_id", "=", "tickets.id")
-                ->select("carts.*", "tickets.quota_left", "tickets.name as ticket_name")
+                ->leftJoin("classes", "tickets.class_id", "=", "classes.id")
+                ->select("carts.*","tickets.name as ticket_name","classes.name as class_name", "tickets.quota_left", "tickets.name as ticket_name")
                 ->whereUserId($this->user->id)
                 ->where("carts.event_id",$event_id)
                 ->get();
