@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\ApiController;
 use App\Models\Cart;
 use App\Http\Repository\TransactionRepository;
+use App\Models\Setting;
 use App\Models\Ticket;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
@@ -57,6 +58,8 @@ class TransactionController extends ApiController
         if (!$transaction) {
             return $this->errorResponse("Data not found");
         }
+
+        $transaction->settings = Setting::select("id","key","value")->where("key","payment_guide")->first();
         return $this->successResponse("Success", $transaction);
     }
 

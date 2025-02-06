@@ -22,6 +22,8 @@ import TransactionsDetail from "../pages/transactions/Detail.vue";
 
 import Event from "../pages/events/Index.vue";
 import EventAddEdit from "../pages/events/AddEdit.vue";
+import PaymentMethods from "../pages/payment-methods/Index.vue";
+import PaymentMethodsAddEdit from "../pages/payment-methods/AddEdit.vue";
 
 const routes = [
     {
@@ -39,6 +41,10 @@ const routes = [
             { path: 'menus/:id', component: MenusAddEdit, meta: { protected: true, title: "Menu" } },
             { path: 'menu-role', component: MenuRole, meta: { protected: true, title: "Menu Role" } },
             { path: 'profile', component: Profile, meta: { protected: true, title: "Profile" } },
+
+            // Payment Methods
+            { path: 'payment-methods', component: PaymentMethods, meta: { protected: true, title: "Metode Pembayaran" } },
+            { path: 'payment-methods/:id', component: PaymentMethodsAddEdit, meta: { protected: true, title: "Metode Pembayaran" } },
 
             // Transaction Details
             { path: 'transactions', component: Transactions, meta: { protected: true, title: "Transactions" } },

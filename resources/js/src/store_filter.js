@@ -61,6 +61,12 @@ export const useFilterStore = defineStore('filter', () => {
         name: '',
     })
 
+    const payment_method_store = reactive({
+        page: 1,
+        per_page: 25,
+        name: '',
+    })
+
     const role_store = reactive({
         page: 1
     })
@@ -83,6 +89,7 @@ export const useFilterStore = defineStore('filter', () => {
         user_store,
         date_config,
         presence_store,
-        post_store
+        post_store,
+        payment_method_store,
     }
 })

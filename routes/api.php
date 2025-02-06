@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\TicketController;
 use App\Http\Controllers\API\CartController;
 use App\Http\Controllers\API\PaymentController;
+use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Panel\EventController as PanelEventController;
 use App\Http\Controllers\Panel\TicketController as PanelTicketController;
 
@@ -22,6 +23,7 @@ use App\Http\Controllers\Panel\FirebaseController;
 
 // Panel
 use App\Http\Controllers\Panel\TransactionController as PanelTransactionController;
+use App\Http\Controllers\Panel\PaymentMethodController as PanelPaymentMethodController;
 
 Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () {
 
@@ -66,6 +68,9 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
 
     // Payment
     Route::resource("payments", PaymentController::class);
+
+    // Payment Methods
+    Route::resource("payment-methods", PaymentMethodController::class);
 });
 
 Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], function () {
@@ -98,4 +103,7 @@ Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], functio
     Route::get("report/balance-sheet", [ReportController::class, "balanceSheet"]);
 
     Route::get("firebase-config", [FirebaseController::class, "loadConfig"]);
+
+    /*Payment Methods*/
+    Route::resource("payment-methods", PanelPaymentMethodController::class);
 });

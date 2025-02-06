@@ -68,7 +68,7 @@ class MenuSeed extends Seeder
             [
                 'title'    => "Payment Method",
                 'icon'     => "bi-cash",
-                'url'      => "/panel/payments",
+                'url'      => "/panel/payment-methods",
                 'type'     => "menu",
                 'children' => []
             ],
