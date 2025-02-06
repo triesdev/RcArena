@@ -33,7 +33,7 @@ class TicketController extends ApiController
             });
 
             // Get Ticket per Pieces
-            $classes = EventClass::select("id as class_id","name as class_name")->whereEventId($id)->get();
+            $classes = EventClass::select("id as class_id","name as class_name","price")->whereEventId($id)->get();
 
             $ticket_pieces = $ticket_by_bundle_ids->where('ticket_bundle_id', null)->flatten();
 

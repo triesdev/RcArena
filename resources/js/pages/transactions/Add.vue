@@ -11,8 +11,7 @@
         </div>
         <div class="app-content flex-column-fluid">
             <div class="app-container container-xxl">
-<!--                <Loading :active="form_props.is_loading" :loader="'dots'" :is-full-page="false" />-->
-                <Loading :active="false" :loader="'dots'" :is-full-page="false" />
+                <Loading :active="form_props.is_loading" :loader="'dots'" :is-full-page="false" />
                 <div class="grid grid-cols-1 lg:grid-cols-[70%_30%] xl:grid-cols-[78%_22%] gap-4">
                     <div>
                         <div class="card mb-4 card-flush">
