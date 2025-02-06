@@ -74,10 +74,11 @@ class AuthController extends ApiController
         $user = User::whereEmail($request->auth_user['email'])->first();
 
         $user->update([
-            'api_token' => null
+            'api_token' => null,
+            'fcm_token' => null,
         ]);
 
-        return $this->successResponse("Success");
+        return $this->successResponse();
     }
 
     public function SSOLogin(Request $request)
@@ -135,5 +136,16 @@ class AuthController extends ApiController
         } catch (\Exception $e) {
             return $this->errorResponse($e->getMessage());
         }
+    }
+
+    public function RegisterFcmToken(Request $request)
+    {
+        $user = User::whereEmail($request->auth_user['email'])->first();
+
+        $user->update([
+            'fcm_token' => $request->fcm_token,
+        ]);
+
+        return $this->successResponse();
     }
 }

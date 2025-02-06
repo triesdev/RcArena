@@ -79,7 +79,7 @@ class TransactionController extends ApiController
             $carts = Cart::where('user_id', $auth_user->id)
                 ->leftJoin('ticket_bundles', 'carts.ticket_bundle_id', '=', 'ticket_bundles.id')
                 ->leftJoin('tickets', 'carts.ticket_id', '=', 'tickets.id')
-                ->select("carts.*","ticket_bundles.name as ticket_bundle_name","tickets.quota_left")
+                ->select("carts.*","ticket_bundles.name as ticket_bundle_name","tickets.quota_left", "tickets.name as ticket_name")
                 ->where('carts.event_id', $request->event_id)
                 ->get();
 
@@ -136,6 +136,7 @@ class TransactionController extends ApiController
                 $transaction_detail->user_id = $auth_user->id;
                 $transaction_detail->ticket_id = $cart->ticket_id;
                 $transaction_detail->ticket_bundle_id = $cart->ticket_bundle_id;
+                $transaction_detail->ticket_name = $cart->ticket_name ?? null;
                 $transaction_detail->ticket_bundle_name = $cart->ticket_bundle_name ?? null;
                 $transaction_detail->user_name = $auth_user->name;
                 $transaction_detail->user_code = $auth_user->user_code;

@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string("user_name");
             $table->string("user_code");
             $table->string("ticket_bundle_name");
+            $table->string("ticket_name");
             $table->integer("qty");
             $table->double("price");
             $table->double("subtotal_price");

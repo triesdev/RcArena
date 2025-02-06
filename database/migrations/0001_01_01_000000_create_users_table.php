@@ -26,6 +26,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(1);
             $table->tinyInteger('role_id');
             $table->string("image_uri")->nullable();
+            $table->string("fcm_token")->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

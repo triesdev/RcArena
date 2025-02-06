@@ -34,6 +34,7 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
     Route::post("register", [AuthController::class, "Register"])->withoutMiddleware([ApiToken::class]);
     Route::get("auth", [AuthController::class, "Auth"]);
     Route::post("logout", [AuthController::class, "Logout"]);
+    Route::post("register-fcm-token", [AuthController::class, "RegisterFcmToken"]);
 
     // Users
     Route::resource('users', UserController::class);

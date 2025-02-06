@@ -19,6 +19,7 @@ class CartController extends ApiController
     private $user;
     private $response_ticket;
     private $ticket_stock_check;
+    private $empty_tickets = [];
     private $event_id;
     private $message = null;
     // END ADD TO CART
@@ -38,7 +39,10 @@ class CartController extends ApiController
             $this->user = $request->auth_user;
             $event_id = $request->input('event_id');
             $carts = Cart::leftJoin("tickets", "carts.ticket_id", "=", "tickets.id")
-                ->select("carts.*", "tickets.quota_left")->whereUserId($this->user->id)->where("carts.event_id",$event_id)->get();
+                ->select("carts.*", "tickets.quota_left", "tickets.name as ticket_name")
+                ->whereUserId($this->user->id)
+                ->where("carts.event_id",$event_id)
+                ->get();
 
 
             $ticket_bundle_out_of_stock = false;
@@ -46,7 +50,6 @@ class CartController extends ApiController
                 //CHECK OUT OF STOCK
                 if ($cart->qty > $cart->quota_left) {
                     $cart->out_of_stock = true;
-                    $ticket_bundle_out_of_stock = true;
                 } else {
                     $cart->out_of_stock = false;
                 }
@@ -135,7 +138,12 @@ class CartController extends ApiController
 
             if (count($this->ticket_stock_check) > 0) {
                 DB::rollBack();
-                return $this->errorResponse("Errors",);
+                $err_msg = "Tiket untuk jenis: \n ";
+                if(count($this->empty_tickets) > 0){
+                    $err_msg .= implode(" ",$this->empty_tickets);
+                }
+                $err_msg .= " Sudah habis. Silahkan pilih jenis burung lain.";
+                return $this->errorResponse($err_msg);
             }
 
             DB::commit();
@@ -168,6 +176,7 @@ class CartController extends ApiController
                 'message' => 'Ticket out of stock',
             ];
             $this->message = 'Ticket out of stock';
+            $this->empty_tickets[] = " - " . $ticket->name . " \n ";
             return;
         }
 
