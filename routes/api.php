@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\TicketController;
 use App\Http\Controllers\API\CartController;
 use App\Http\Controllers\API\PaymentController;
-use App\Http\Controllers\Api\PaymentMethodController;
+use App\Http\Controllers\API\PaymentMethodController;
 use App\Http\Controllers\Panel\EventController as PanelEventController;
 use App\Http\Controllers\Panel\TicketController as PanelTicketController;
 
