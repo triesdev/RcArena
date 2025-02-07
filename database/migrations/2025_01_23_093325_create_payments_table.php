@@ -23,8 +23,8 @@ class CreatePaymentsTable extends Migration
             $table->string("phone_number");
             $table->string("account_name");
             $table->double("nominal_payment");
-            $table->string("payment_proof_image_uri");
-            $table->boolean("is_confirmed");
+            $table->string("payment_proof_image_uri")->nullable();
+            $table->boolean("is_confirmed")->default(0);
             $table->timestamps();
             $table->softDeletes();
 

@@ -104,7 +104,7 @@
                                                 <button @click="openModalConfirm('Konfirmasi','confirmed')" class="btn btn-sm btn-primary">
                                                     Konfirmasi
                                                 </button>
-                                                <button @click="openModalConfirm('Upload Ulang','pending')" class="btn btn-sm btn-secondary">
+                                                <button v-if="data_content.data_detail.payment.nominal_payment > 0" @click="openModalConfirm('Upload Ulang','pending')" class="btn btn-sm btn-secondary">
                                                     Upload Ulang Bukti Bayar
                                                 </button>
                                                 <button @click="openModalConfirm('Reject','reject')" class="btn btn-sm btn-danger">
