@@ -30,7 +30,7 @@ class PaymentController extends ApiController
             return $this->errorResponse("Transaction not found");
         }
 
-        $status_allowed = ['new','process'];
+        $status_allowed = ['unpaid','process'];
         if (!in_array($transaction->transaction_status, $status_allowed)) {
             return $this->errorResponse("Transaction already paid");
         }
