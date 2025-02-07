@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\ApiController;
 use App\Models\Cart;
 use App\Http\Repository\TransactionRepository;
+use App\Models\Payment;
 use App\Models\Setting;
 use App\Models\Ticket;
 use App\Models\Transaction;
@@ -109,6 +110,12 @@ class TransactionController extends ApiController
             $unique_code_price = rand(100, 500);
             $total_cart_prices = $carts->sum('total_price');
 
+            if ($total_cart_prices == 0){
+                $unique_code_price = 0;
+            }
+
+            $grandtotal = $total_cart_prices + $unique_code_price;
+
             // Payment Limit Date + 15 menits
             $payment_limit_date = date('Y-m-d H:i:s', strtotime($transaction_date . ' + 15 minutes'));
 
@@ -121,8 +128,26 @@ class TransactionController extends ApiController
             $transaction->transaction_number = $this->generateInvoiceNumberTransactions();
             $transaction->subtotal_price = $total_cart_prices;
             $transaction->unique_code_price = $unique_code_price;
-            $transaction->total_price = $total_cart_prices + $unique_code_price;
+            $transaction->total_price = $grandtotal;
+
+            // STATUS
+            $transaction->transaction_status = $total_cart_prices == 0 ? 'process' : 'pending';
             $transaction->save();
+
+            // If Total Price 0 Create Payment
+            if ($total_cart_prices == 0) {
+                $payment = new Payment();
+                $payment->transaction_id = $transaction->id;
+                $payment->user_id = $auth_user->id;
+                $payment->payment_status = 'new';
+                $payment->name = $auth_user->name;
+                $payment->phone_number = $auth_user->phone_number;
+                $payment->payment_date = now();
+                $payment->payment_proof_image_uri = null;
+                $payment->account_name = $auth_user->name;
+                $payment->nominal_payment = 0;
+                $payment->save();
+            }
 
             // LOCK FOR UPDATE TICKET QUOTA LEFT
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\ApiController;
 use App\Http\Repository\TransactionRepository;
 use App\Models\EventClass;
+use App\Models\Role;
 use App\Models\Ticket;
 use App\Models\TicketBundle;
 use App\Models\TransactionDetailUser;
@@ -50,71 +51,5 @@ class TicketController extends ApiController
         } catch (\Exception $ex) {
             return $this->errorResponse($ex->getMessage());
         }
-    }
-
-    public function userTickets(Request $request)
-    {
-        $transactions = (new TransactionRepository())->TicketTransactionDetailUsers($request);
-        return $this->successResponse("Success", $transactions);
-    }
-
-    public function userTicketsByTransactionId($transaction_id, Request $request){
-        $auth_user = $request->auth_user;
-        $transactions = (new TransactionRepository())->getTicketsByTransactionId($transaction_id, $auth_user);
-        return $this->successResponse("Success", $transactions);
-    }
-
-    public function transferTicket(Request $request)
-    {
-        /*
-         * transaction_detail_users_id
-         * user code
-         * */
-
-        $validator = Validator::make($request->all(), [
-            'transaction_detail_users_id' => 'required',
-            'user_code' => 'required'
-        ]);
-
-        if ($validator->fails()) {
-            return $this->errorResponse($validator->errors()->first());
-        }
-
-        $transaction_detail_users_id = $request->input("transaction_detail_users_id");
-        $user_code = $request->input("user_code");
-
-        $transaction_detail_user = TransactionDetailUser::find($transaction_detail_users_id);
-        if (!$transaction_detail_user) {
-            return $this->errorResponse("Data not found");
-        }
-
-        $user = User::whereUserCode($user_code)->first();
-
-        if (!$user) {
-            return $this->errorResponse("User not found");
-        }
-
-        // CHECK IF USER TRANSFER ON OWN ID
-        if ($transaction_detail_user->user_id == $user->id) {
-            return $this->errorResponse("You can't transfer to your own account");
-        }
-        DB::beginTransaction();
-        try {
-            // CLONE AND CREATE NEW TRANSACTION DETAIL NEW USER
-            $new_transaction_detail_user = $transaction_detail_user->replicate();
-            $new_transaction_detail_user->user_id = $user->id;
-            $new_transaction_detail_user->save();
-
-            // UPDATE EXISTING TRANSACTION DETAIL USER IS TRANSFERED STATUS
-            $transaction_detail_user->is_transfered = 1;
-            $transaction_detail_user->save();
-
-            DB::commit();
-        } catch (\Exception $exception){
-            DB::rollBack();
-            return $this->errorResponse($exception->getMessage());
-        }
-
-        return $this->successResponse("Success", $new_transaction_detail_user);
     }
 }

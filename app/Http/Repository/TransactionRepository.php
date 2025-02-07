@@ -110,6 +110,7 @@ class TransactionRepository extends ApiController
                 ->select(
                     "transaction_detail_users.id as transaction_detail_users_id",
                     "transaction_details.transaction_id",
+                    "transaction_detail_users.ticket_user_type",
                     "tickets.name as ticket_name",
                     "classes.name as class_name",
                     "users.user_code",
@@ -143,7 +144,7 @@ class TransactionRepository extends ApiController
         $role = Role::find($auth_user->role_id);
 
         $transactions->transaction_detail_users = $transactions->transaction_detail_users->map(function ($transaction_detail_user) use ($role) {
-            if ($role->name == "Coordinator" && $transaction_detail_user->is_transfered == 0) {
+            if ($role->name == "Coordinator" && $transaction_detail_user->is_transfered == 0 && $transaction_detail_user->ticket_user_type == 'community') {
                 $transaction_detail_user->enable_transfer = true;
             } else {
                 $transaction_detail_user->enable_transfer = false;
@@ -151,6 +152,12 @@ class TransactionRepository extends ApiController
             return $transaction_detail_user;
         });
 
+        // Mapping Transfered Ticket And Normal Ticket
+        $transactions->own_tickets = $transactions->transaction_detail_users->where("is_transfered",0)->flatten();
+        $transactions->transfered_tickets = $transactions->transaction_detail_users->where("is_transfered",1)->flatten();
+
+        // Delete Transaction Detail Users
+        unset($transactions->transaction_detail_users);
 
         return $transactions;
     }

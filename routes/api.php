@@ -16,6 +16,7 @@ use App\Http\Controllers\API\TicketController;
 use App\Http\Controllers\API\CartController;
 use App\Http\Controllers\API\PaymentController;
 use App\Http\Controllers\API\PaymentMethodController;
+use App\Http\Controllers\API\TicketUserController;
 use App\Http\Controllers\Panel\EventController as PanelEventController;
 use App\Http\Controllers\Panel\TicketController as PanelTicketController;
 
@@ -64,9 +65,11 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
     Route::get("transactions/detail-payment/{id}", [TransactionController::class, "getTransactionForPayment"]);
 
     // Ticket User => Transaction Detail Users
-    Route::get("user-tickets", [TicketController::class, "userTickets"]);
-    Route::get("user-tickets-by-transaction-id/{transaction_id}", [TicketController::class, "userTicketsByTransactionId"]);
-    Route::post("user-tickets-transfer", [TicketController::class, "transferTicket"]);
+    Route::get("user-tickets", [TicketUserController::class, "userTickets"]);
+    Route::get("user-tickets/{transaction_detail_users_id}", [TicketUserController::class, "detailTicketUser"]);
+    Route::patch("user-tickets/{transaction_detail_users_id}", [TicketUserController::class, "updateParticipantName"]);
+    Route::get("user-tickets-by-transaction-id/{transaction_id}", [TicketUserController::class, "userTicketsByTransactionId"]);
+    Route::post("user-tickets-transfer", [TicketUserController::class, "transferTicket"]);
 
     // Payment
     Route::resource("payments", PaymentController::class);

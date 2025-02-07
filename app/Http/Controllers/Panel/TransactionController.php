@@ -149,7 +149,7 @@ class TransactionController extends ApiController
     {
         // Transaction Details Users
 
-        $transaction_details = TransactionDetail::whereTransactionId($transaction_id)->get();
+        $transaction_details = TransactionDetail::whereTransactionId($transaction_id)->with("transactions")->get();
 
         foreach ($transaction_details as $detail){
             // Loop Base On Qty
@@ -161,6 +161,7 @@ class TransactionController extends ApiController
                 $transaction_detail_user->transaction_id = $detail->transaction_id;
                 $transaction_detail_user->qty = 1;
                 $transaction_detail_user->ticket_number = $ticket_number;
+                $transaction_detail_user->ticket_user_type = $detail->transactions->transaction_type;
                 $transaction_detail_user->save();
             }
         }
