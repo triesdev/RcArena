@@ -2,6 +2,7 @@
 
 namespace App\Http\Repository;
 use App\Http\Controllers\ApiController;
+use App\Models\Role;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -83,7 +84,8 @@ class TransactionRepository extends ApiController
             FROM transactions
             LEFT JOIN events ON transactions.event_id = events.id
             LEFT JOIN (
-                SELECT transaction_details.id, transaction_details.transaction_id, transaction_detail_users.id as transaction_detail_users_id, transaction_detail_users.user_id FROM transaction_details JOIN transaction_detail_users ON transaction_details.id = transaction_detail_users.transaction_detail_id WHERE transaction_detail_users.user_id = {$user->id} AND transaction_detail_users.deleted_at IS NULL
+                SELECT transaction_details.id, transaction_details.transaction_id, transaction_detail_users.id as transaction_detail_users_id, transaction_detail_users.user_id FROM transaction_details JOIN transaction_detail_users ON transaction_details.id = transaction_detail_users.transaction_detail_id WHERE transaction_detail_users.user_id = {$user->id}
+                 AND transaction_detail_users.is_transfered = 0 AND transaction_detail_users.deleted_at IS NULL
             ) as transaction_details ON transactions.id = transaction_details.transaction_id
             WHERE transactions.transaction_status = 'success' AND transactions.deleted_at IS NULL
             AND transaction_details.user_id = {$user->id}
@@ -109,13 +111,13 @@ class TransactionRepository extends ApiController
                     "transaction_detail_users.id as transaction_detail_users_id",
                     "transaction_details.transaction_id",
                     "tickets.name as ticket_name",
-                    "tickets.ticket_type",
                     "classes.name as class_name",
                     "users.user_code",
                     "users.name as user_name",
                     "transaction_detail_users.ticket_number",
                     "transaction_detail_users.participant_name",
                     "transaction_detail_users.participant_chair_number",
+                    "transaction_detail_users.is_transfered"
                 )->where("transaction_detail_users.user_id","=",$user_id);
         }])
         ->whereHas("transaction_detail_users", function ($q) use ($user_id) {
@@ -126,6 +128,7 @@ class TransactionRepository extends ApiController
     "transactions.id",
             "transactions.transaction_number",
             "transactions.transaction_date",
+            "transactions.transaction_type",
             "events.id  as event_id",
             "events.name as event_name",
             "events.location_name as event_location_name",
@@ -135,6 +138,19 @@ class TransactionRepository extends ApiController
             "events.event_end as event_end_date",
         )
         ->find($transaction_id);
+
+        // IF ROLE COORDINATOR
+        $role = Role::find($auth_user->role_id);
+
+        $transactions->transaction_detail_users = $transactions->transaction_detail_users->map(function ($transaction_detail_user) use ($role) {
+            if ($role->name == "Coordinator" && $transaction_detail_user->is_transfered == 0) {
+                $transaction_detail_user->enable_transfer = true;
+            } else {
+                $transaction_detail_user->enable_transfer = false;
+            }
+            return $transaction_detail_user;
+        });
+
 
         return $transactions;
     }
