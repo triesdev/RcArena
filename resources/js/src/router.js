@@ -24,6 +24,7 @@ import Event from "../pages/events/Index.vue";
 import EventAddEdit from "../pages/events/AddEdit.vue";
 import PaymentMethods from "../pages/payment-methods/Index.vue";
 import PaymentMethodsAddEdit from "../pages/payment-methods/AddEdit.vue";
+import EventDetail from "../pages/events/Detail.vue";
 
 const routes = [
     {
@@ -53,6 +54,7 @@ const routes = [
 
             { path: 'events', component: Event, meta: { protected: true, title: "Events" } },
             { path: 'events/:id', component: EventAddEdit, meta: { protected: true, title: "Event Update" } },
+            { path: 'events-detail/:id', component: EventDetail, meta: { protected: true, title: "Event Detail" } },
         ]
     },
     { path: "/auth/404", name: "not-found", component: NotFound },

@@ -1,11 +1,10 @@
 <?php
 
 namespace App\Http\Traits;
+
 use Google\Auth\Credentials\ServiceAccountCredentials;
-use Illuminate\Support\Facades\Log;
 
 trait FCM {
-
     protected $client;
     protected $projectId;
     protected $base_url;
@@ -20,7 +19,7 @@ trait FCM {
         $this->projectId = env('FCM_PROJECT_ID');
         $this->base_url = 'https://fcm.googleapis.com/v1/projects/' . $this->projectId .'/';
 
-        $credentialsPath = storage_path('service-account.json');  // Use storage_path helper
+        $credentialsPath = base_path('rcarena-pk.json');
 
         if (!file_exists($credentialsPath)) {
             throw new \Exception("Service account file does not exist at path: " . $credentialsPath);
@@ -38,7 +37,7 @@ trait FCM {
     /**
      * Send Notification to a Single FCM Token
      */
-    public function sendNotif($fcmToken = "", $data = []) {
+    public function sendNotification($fcmToken = "", $data = []) {
 
         $response = [
             'status' => false,
@@ -74,15 +73,11 @@ trait FCM {
                     'title' => $data['title'],
                     'body' => $data['message'],
                 ],
-                'data' => [
-                    'page_route' => $data['route'],
-                    'id' => (string) $data['id'],
-                ]
             ]
         ];
 
         // Send the request
-        try {
+//        try {
             $ch = curl_init();
 
             curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/v1/projects/'.$this->projectId.'/messages:send');
@@ -103,17 +98,19 @@ trait FCM {
             }
             curl_close($ch);
 
-            $response['status'] = true;
-            $response['text'] = "Success";
-            $response['response'] = $res;
-            $response['payload'] = $payload;
-            $response['header'] = $headers;
-
-        } catch (\Exception $e) {
-            $response['text'] = $e->getMessage();
-        }
-
-        return $response;
+            return $res;
+//
+//            $response['status'] = true;
+//            $response['text'] = "Success";
+//            $response['response'] = $res;
+//            $response['payload'] = $payload;
+//            $response['header'] = $headers;
+//        } catch (\Exception $e) {
+//            $response['text'] = $e->getMessage();
+//            return $response;
+//        }
+//
+//        return $response;
     }
 
     /**

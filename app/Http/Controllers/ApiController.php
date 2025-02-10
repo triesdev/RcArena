@@ -18,9 +18,9 @@ class ApiController
         return ApiResponse::createSuccess($message, $result);
     }
 
-    protected function errorResponse(string $message = 'Error',  $result = null, int $statusCode = 400): \Illuminate\Http\JsonResponse
+    protected function errorResponse(string $message = 'Error',  $errors = null, int $statusCode = 400): \Illuminate\Http\JsonResponse
     {
-        return ApiResponse::error($message, $result, $statusCode);
+        return ApiResponse::error($message, $errors, $statusCode);
     }
 
     protected function validationErrorResponse(string $message = 'Validation Error',  $errors = null): \Illuminate\Http\JsonResponse

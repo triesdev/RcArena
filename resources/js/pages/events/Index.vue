@@ -73,6 +73,10 @@
                                                             class="dropdown-item">
                                                             Edit
                                                         </router-link>
+                                                        <router-link :to="'/panel/events-detail/' + data.id"
+                                                            class="dropdown-item">
+                                                            Detail
+                                                        </router-link>
                                                         <button class="dropdown-item text-danger"
                                                             @click="deleteModal(data.id)">
                                                             Hapus

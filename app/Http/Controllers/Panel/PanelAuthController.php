@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Panel;
 
+use App\Http\Traits\FCM;
 use App\Models\User;
 use App\Utils\StringGenerator;
 use Illuminate\Http\Request;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 
 class PanelAuthController extends PanelController
 {
+    use FCM;
     public function loginView()
     {
         return view('admin.Login');
@@ -91,5 +93,15 @@ class PanelAuthController extends PanelController
         ]);
 
         return $this->successResponse("Success");
+    }
+
+    public function testSendNotification()
+    {
+        $reg_id = 'exBZc8L6QySRNg-yxVUyse:APA91bERzz5JbGRHgWSgag4v5Bvz3Q8uhWdDulaZDA2J_YShJBwhGSl1b8mTf5cOdES48R4p4ISrcns8XrO6zWxb0dmWoh1AzDySp_e4OguHE8Sza_hZD7vFHxo5LhbPRaFpZJmUsvb8';
+
+        return $this->sendNotification($reg_id, [
+            'title'=> "Notification",
+            'message' => "Notification active"
+        ]);
     }
 }

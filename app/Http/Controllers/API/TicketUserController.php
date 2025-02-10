@@ -99,7 +99,9 @@ class TicketUserController extends ApiController
             return $this->errorResponse($validator->errors()->first());
         }
 
-        $transaction_detail_user = TransactionDetailUser::whereUserId(request()->auth_user->id)->whereIsTransfered(0)->find($transaction_detail_users_id);
+        $transaction_detail_user = TransactionDetailUser::whereUserId(request()->auth_user->id)
+            ->whereIsTransfered(0)
+            ->find($transaction_detail_users_id);
 
         if (!$transaction_detail_user) {
             return $this->errorResponse("Data not found");

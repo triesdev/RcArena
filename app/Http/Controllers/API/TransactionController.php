@@ -131,7 +131,7 @@ class TransactionController extends ApiController
             $transaction->total_price = $grandtotal;
 
             // STATUS
-            $transaction->transaction_status = $total_cart_prices == 0 ? 'process' : 'pending';
+            $transaction->transaction_status = $total_cart_prices == 0 ? 'process' : 'unpaid';
             $transaction->save();
 
             // If Total Price 0 Create Payment

@@ -19,12 +19,12 @@ use App\Http\Controllers\API\PaymentMethodController;
 use App\Http\Controllers\API\TicketUserController;
 use App\Http\Controllers\Panel\EventController as PanelEventController;
 use App\Http\Controllers\Panel\TicketController as PanelTicketController;
-
 use App\Http\Controllers\Panel\FirebaseController;
 
 // Panel
 use App\Http\Controllers\Panel\TransactionController as PanelTransactionController;
 use App\Http\Controllers\Panel\PaymentMethodController as PanelPaymentMethodController;
+use App\Http\Controllers\Panel\PanelClassController;
 
 Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () {
 
@@ -83,6 +83,7 @@ Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], functio
     Route::post("login", [PanelAuthController::class, "login"])->withoutMiddleware([PanelToken::class]);
     Route::get("auth", [PanelAuthController::class, "auth"]);
     Route::post("logout", [PanelAuthController::class, "logout"]);
+    Route::post("send-notification", [PanelAuthController::class, 'testSendNotification']);
 
     // Account
     Route::resource("users", UserController::class);
@@ -90,14 +91,15 @@ Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], functio
     Route::resource("roles", RoleController::class);
     Route::resource("menus", MenuController::class);
     Route::resource("menu-role", MenuRoleController::class);
+    Route::resource("panel-classes", PanelClassController::class);
 
     Route::resource("transactions", PanelTransactionController::class);
     Route::patch("transaction-payment-process/{payment_id}", [PanelTransactionController::class, "paymentProcess"]);
     Route::resource("events", PanelEventController::class);
 
     /*Properties*/
-    Route::get('events-properties', [PanelEventController::class,'properties']);
-    Route::get('ticket-properties', [PanelTicketController::class,'properties']);
+    Route::get('events-properties', [PanelEventController::class, 'properties']);
+    Route::get('ticket-properties', [PanelTicketController::class, 'properties']);
     /*End Properties*/
 
     Route::get("menu-tree", [MenuRoleController::class, "menuTree"]);
