@@ -70,7 +70,7 @@ class UserController extends ApiController
         $data = User::where('user_code', $code)->first();
 
         if (!$data) {
-            return $this->notFoundResponse();
+            return $this->notFoundResponse("Kode User tidak valid");
         }
 
         return $this->successResponse("Success", $data);
