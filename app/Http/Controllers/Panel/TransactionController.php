@@ -271,7 +271,7 @@ class TransactionController extends ApiController
                         'ticket_bundle_id' => null,
                         'ticket_id'      => $detail['id'],
                         'ticket_bundle_name' => null,
-                        'ticket_name'    => $detail['name'],
+                        'ticket_name'    => $detail['ticket_name'],
                         'user_name'      => $user->name,
                         'user_id'        => $request->user_id,
                         'user_code'      => $user->user_code,
