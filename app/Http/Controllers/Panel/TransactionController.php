@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Panel;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\Controller;
 use App\Http\Repository\TransactionRepository;
+use App\Models\Event;
+use App\Models\EventClass;
 use App\Models\Payment;
 use App\Models\Ticket;
 use App\Models\TicketBundle;
@@ -29,10 +31,10 @@ class TransactionController extends ApiController
     public function index(Request $request)
     {
         $transactions = Transaction::with('user')
-            ->leftJoin('events', 'transactions.event_id', '=', 'events.id')
+//            ->leftJoin('events', 'transactions.event_id', '=', 'events.id')
             ->leftJoin('transaction_details', 'transactions.id', '=', 'transaction_details.transaction_id')
             ->orderBy('transactions.created_at', 'desc')
-            ->select('transactions.*', 'events.name as event_name',DB::raw('SUM(transaction_details.qty) as total_qty'))
+            ->select('transactions.*',DB::raw('SUM(transaction_details.qty) as total_qty'))
             ->groupBy('transactions.id')
             // Filter
             ->when($request->status, function ($q) use ($request) {
@@ -162,6 +164,16 @@ class TransactionController extends ApiController
                 $transaction_detail_user->qty = 1;
                 $transaction_detail_user->ticket_number = $ticket_number;
                 $transaction_detail_user->ticket_user_type = $detail->transactions->transaction_type;
+
+                // ADD DENORMALIZE DATA
+                $transaction_detail_user->ticket_id = $detail->ticket_id;
+                $transaction_detail_user->ticket_name = $detail->ticket_name;
+                $transaction_detail_user->class_id = $detail->class_id;
+                $transaction_detail_user->class_name = $detail->class_name;
+                $transaction_detail_user->event_id = $detail->event_id;
+                $transaction_detail_user->event_name = $detail->event_name;
+                $transaction_detail_user->user_name = $detail->user_name;
+
                 $transaction_detail_user->save();
             }
         }
@@ -211,6 +223,10 @@ class TransactionController extends ApiController
             $user = User::find($request->user_id);
             // Payment Limit Date + 15Menit
             $payment_limt_date = now()->addMinutes(15);
+
+            // GET DATA FOR DENORMALIZE
+            $event = Event::where('id', $request->event_id)->first();
+
             $transaction_api_controller = new \App\Http\Controllers\API\TransactionController();
             $transaction = Transaction::create([
                 'event_id'      => $request->event_id,
@@ -225,7 +241,8 @@ class TransactionController extends ApiController
                 'transaction_status' => 'unpaid',
                 'transaction_type' => $request->ticket_type,
                 'payment_limit_date' => $payment_limt_date,
-                'is_from_panel' => 1
+                'is_from_panel' => 1,
+                'event_name' => $event->name,
             ]);
 
             $data_details_bundle = collect($request->details)->where("type","bundle");
@@ -240,26 +257,32 @@ class TransactionController extends ApiController
                 // Bundle
                 if ($detail['type'] == 'bundle') {
                     $ticket_bundle_id = $detail['id'];
-                    $ticket_bundle = $ticket_bundles->where('id', $ticket_bundle_id)->first();
-                    $qty = $detail['qty'];
-                    foreach ($detail['tickets'] as $bundle) {
-                        if (!$ticket_bundle) {
-                            DB::rollBack();
-                            return $this->errorResponse('Ticket bundle not found');
-                        }
 
+                    $ticket_bundle = $ticket_bundles->where('id', $ticket_bundle_id)->first();
+
+                    if (!$ticket_bundle) {
+                        DB::rollBack();
+                        return $this->errorResponse('Ticket bundle not found');
+                    }
+
+                    $qty = $detail['qty'];
+                    foreach ($detail['tickets'] as $piece) {
                         $transaction_detail = TransactionDetail::create([
                             'transaction_id' => $transaction->id,
                             'ticket_bundle_id' => $ticket_bundle_id,
-                            'ticket_id' => $bundle['id'],
+                            'ticket_id' => $piece['id'],
                             'ticket_bundle_name' => $ticket_bundle->name,
-                            'ticket_name' => $bundle['ticket_name'],
+                            'ticket_name' => $piece['ticket_name'],
                             'qty'            => $qty,
                             'price'          => $detail['price'],
                             'subtotal_price' => $detail['subtotal_price'],
                             'user_id' => $request->user_id,
                             'user_code' => $user->user_code,
                             'user_name' => $user->name,
+                            'event_name' => $event->name,
+                            'event_id' => $event->id,
+                            'class_id' => $piece['class_id'],
+                            'class_name' => $piece['class_name'],
                         ]);
 
                         array_push($transaction_details, $transaction_detail);
@@ -278,6 +301,10 @@ class TransactionController extends ApiController
                         'qty'            => $detail['qty'],
                         'price'          => $detail['price'],
                         'subtotal_price' => $detail['subtotal_price'],
+                        'event_name' => $event->name,
+                        'event_id' => $event->id,
+                        'class_id' => $detail['class_id'],
+                        'class_name' => $detail['class_name'],
                     ]);
 
                     array_push($transaction_details, $transaction_detail);

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\ApiController;
 use App\Models\Cart;
 use App\Http\Repository\TransactionRepository;
+use App\Models\Event;
+use App\Models\EventClass;
 use App\Models\Payment;
 use App\Models\Setting;
 use App\Models\Ticket;
@@ -19,9 +21,7 @@ class TransactionController extends ApiController
 {
     public function index(Request $request)
     {
-
         // QUERY GENERATE
-
         $transaction = Transaction::leftJoin("transaction_details","transactions.id","=","transaction_details.transaction_id")
         ->leftJoin('events', 'transactions.event_id', '=', 'events.id')
         ->selectRaw(DB::raw(
@@ -81,9 +81,10 @@ class TransactionController extends ApiController
 
             // GET CARTS USER
             $carts = Cart::where('user_id', $auth_user->id)
-                ->leftJoin('ticket_bundles', 'carts.ticket_bundle_id', '=', 'ticket_bundles.id')
-                ->leftJoin('tickets', 'carts.ticket_id', '=', 'tickets.id')
-                ->select("carts.*","ticket_bundles.name as ticket_bundle_name","tickets.quota_left", "tickets.name as ticket_name")
+                ->leftJoin('ticket_bundles', 'carts.ticket_bundle_id', '=', 'ticket_bundles.id') // Harus left karena tidak semua ada data ini
+                ->join('tickets', 'carts.ticket_id', '=', 'tickets.id')
+                ->join('classes', 'tickets.class_id', '=', 'classes.id')
+                ->select("carts.*","tickets.class_id","classes.name as class_name","ticket_bundles.name as ticket_bundle_name","tickets.quota_left", "tickets.name as ticket_name")
                 ->where('carts.event_id', $request->event_id)
                 ->get();
 
@@ -119,9 +120,13 @@ class TransactionController extends ApiController
             // Payment Limit Date + 15 menits
             $payment_limit_date = date('Y-m-d H:i:s', strtotime($transaction_date . ' + 15 minutes'));
 
+            // EVENTS
+            $event = Event::find($request->event_id);
+
             $transaction = new Transaction();
             $transaction->user_id = $auth_user->id;
             $transaction->event_id = $request->event_id;
+            $transaction->event_name = $event->name;
             $transaction->user_name = $auth_user->name;
             $transaction->transaction_date = $transaction_date;
             $transaction->payment_limit_date = $payment_limit_date;
@@ -158,6 +163,11 @@ class TransactionController extends ApiController
 
             // INSERT Transaction Details
             $transaction_detail_response = [];
+
+            // GET ALL CLASS ID
+            $class_ids = $carts->pluck('class_id')->toArray();
+            $classes = EventClass::whereIn('id', $class_ids)->get();
+
             foreach ($carts as $cart) {
                 $transaction_detail = new TransactionDetail();
                 $transaction_detail->transaction_id = $transaction->id;
@@ -171,6 +181,12 @@ class TransactionController extends ApiController
                 $transaction_detail->qty = $cart->qty;
                 $transaction_detail->price = $cart->price;
                 $transaction_detail->subtotal_price = $cart->qty * $cart->price;
+
+                $transaction_detail->class_id = $cart->class_id;
+                $transaction_detail->class_name = $cart->class_name;
+                $transaction_detail->event_id = $request->event_id;
+                $transaction_detail->event_name = $event->name;
+
                 $transaction_detail->save();
 
                 // Update Quota Left

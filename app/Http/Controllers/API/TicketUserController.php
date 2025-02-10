@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\ApiController;
+use App\Http\Repository\TicketUserRepository;
 use App\Http\Repository\TransactionRepository;
 use App\Models\Role;
 use App\Models\TransactionDetailUser;
@@ -15,13 +16,13 @@ class TicketUserController extends ApiController
 {
     public function userTickets(Request $request)
     {
-        $transactions = (new TransactionRepository())->TicketTransactionDetailUsers($request);
+        $transactions = (new TransactionRepository())->TicketTransactionDetailUsers2($request);
         return $this->successResponse("Success", $transactions);
     }
 
     public function userTicketsByTransactionId($transaction_id, Request $request){
         $auth_user = $request->auth_user;
-        $transactions = (new TransactionRepository())->getTicketsByTransactionId($transaction_id, $auth_user);
+        $transactions = (new TransactionRepository())->getTicketsByTransactionId2($transaction_id, $auth_user);
         return $this->successResponse("Success", $transactions);
     }
 
@@ -33,8 +34,7 @@ class TicketUserController extends ApiController
          * */
 
         // CHECK ROLE
-        $role = Role::find($request->auth_user->role_id);
-        if ($role->name != "Coordinator") {
+        if ($request->auth_user->user_type_mobile != "coordinator") {
             return $this->errorResponse("You don't have permission to update participant name");
         }
 
@@ -73,10 +73,11 @@ class TicketUserController extends ApiController
             $new_transaction_detail_user->user_id = $user->id;
             $new_transaction_detail_user->ticket_user_type = "regular"; // AUTO REGULAR
             $new_transaction_detail_user->participant_name = null;
+            $new_transaction_detail_user->origin_transfer_user_id = $transaction_detail_user->user_id; // origin dari siapa agar bisa di track
             $new_transaction_detail_user->save();
 
             // UPDATE EXISTING TRANSACTION DETAIL USER IS TRANSFERED STATUS
-            $transaction_detail_user->is_transfered = 1;
+            $transaction_detail_user->is_transfered = 1; // mengupdate status transfer
             $transaction_detail_user->save();
 
             DB::commit();
@@ -115,6 +116,7 @@ class TicketUserController extends ApiController
 
     public function detailTicketUser($transaction_detail_users_id)
     {
+        // UNMAINTANED CODE
         $transaction_detail_user = TransactionDetailUser::where("transaction_detail_users.user_id",request()->auth_user->id)
             ->whereIsTransfered(0)
             ->leftJoin("transactions", "transaction_detail_users.transaction_id", "=", "transactions.id")
@@ -136,6 +138,21 @@ class TicketUserController extends ApiController
                 "transaction_detail_users.ticket_number",
             )
             ->find($transaction_detail_users_id);
+
+        if (!$transaction_detail_user) {
+            return $this->errorResponse("Data not found");
+        }
+
+        return $this->successResponse("Success", $transaction_detail_user);
+    }
+
+    public function detailTicketUser2($transaction_detail_users_id)
+    {
+        // Initialize TicketUserRepository
+        $ticket_user_repo = new TicketUserRepository(request()->auth_user);
+
+        // Get detail ticket user
+        $transaction_detail_user = $ticket_user_repo->getDetailTicketUser($transaction_detail_users_id);
 
         if (!$transaction_detail_user) {
             return $this->errorResponse("Data not found");

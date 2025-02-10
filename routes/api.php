@@ -68,7 +68,7 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
 
     // Ticket User => Transaction Detail Users
     Route::get("user-tickets", [TicketUserController::class, "userTickets"]);
-    Route::get("user-tickets/{transaction_detail_users_id}", [TicketUserController::class, "detailTicketUser"]);
+    Route::get("user-tickets/{transaction_detail_users_id}", [TicketUserController::class, "detailTicketUser2"]);
     Route::patch("user-tickets/{transaction_detail_users_id}", [TicketUserController::class, "updateParticipantName"]);
     Route::get("user-tickets-by-transaction-id/{transaction_id}", [TicketUserController::class, "userTicketsByTransactionId"]);
     Route::post("user-tickets-transfer", [TicketUserController::class, "transferTicket"]);

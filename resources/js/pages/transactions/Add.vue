@@ -409,6 +409,7 @@ export default {
                 tickets: item.tickets.map((ticket) => {
                     return {
                         id: ticket.id,
+                        class_id: ticket.class_id,
                         class_name: ticket.class_name,
                         ticket_name: ticket.ticket_name,
                         type: "piece"
@@ -423,6 +424,7 @@ export default {
             const detail = {
                 id: ticket.id,
                 class_name: ticket.class_name,
+                class_id: ticket.class_id,
                 ticket_name: ticket.name,
                 qty: 1,
                 price: ticket.price,
