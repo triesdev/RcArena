@@ -67,7 +67,7 @@
                                                 <thead>
                                                 <tr class="bg-gray-50">
                                                     <th class="text-gray-600 text-center">Kelas</th>
-                                                    <th class="text-gray-60 text-center">Jenis Burung</th>
+                                                    <th class="text-gray-60 text-center">Varian</th>
                                                     <th width="10%" class="text-gray-600 text-center">Qty</th>
                                                     <th class="text-gray-600 text-center">Harga</th>
                                                     <th class="text-gray-600 text-center">Subtotal</th>
