@@ -19,6 +19,8 @@ use App\Http\Controllers\API\PaymentMethodController;
 use App\Http\Controllers\API\TicketUserController;
 use App\Http\Controllers\Panel\EventController as PanelEventController;
 use App\Http\Controllers\Panel\TicketController as PanelTicketController;
+use App\Http\Controllers\Panel\EventClassController as PanelEventClassController;
+
 use App\Http\Controllers\Panel\FirebaseController;
 
 // Panel
@@ -96,6 +98,11 @@ Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], functio
     Route::resource("transactions", PanelTransactionController::class);
     Route::patch("transaction-payment-process/{payment_id}", [PanelTransactionController::class, "paymentProcess"]);
     Route::resource("events", PanelEventController::class);
+    Route::get("events/class-participants/{id}", [PanelEventController::class, "classParticipants"]);
+
+    /*Class*/
+    Route::get('events-class/{event_id}', [PanelEventClassController::class,'eventClasses']);
+    Route::get('events-class-variants/{class_id}', [PanelEventClassController::class,'eventClassVariants']);
 
     /*Properties*/
     Route::get('events-properties', [PanelEventController::class, 'properties']);

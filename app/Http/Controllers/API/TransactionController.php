@@ -38,15 +38,15 @@ class TransactionController extends ApiController
             events.event_start
             ",
         ))->when($request->transaction_status, function ($q) use ($request){
-                return $q->where('transaction_status', $request->transaction_status);
-            })
-            ->when($request->event_id, function ($q) use ($request){
-                return $q->where('event_id', $request->event_id);
-            })
-            ->where("transactions.user_id",$request->auth_user->id)
-            ->groupBy('transactions.id')
-            ->limit($request->limit ?? 10)->offset($request->offset ?? 0)
-            ->get();
+            return $q->where('transaction_status', $request->transaction_status);
+        })
+        ->when($request->event_id, function ($q) use ($request){
+            return $q->where('event_id', $request->event_id);
+        })
+        ->where("transactions.user_id",$request->auth_user->id)
+        ->groupBy('transactions.id')
+        ->limit($request->limit ?? 10)->offset($request->offset ?? 0)
+        ->get();
 
         return $this->successResponse("Success", $transaction);
     }

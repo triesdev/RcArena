@@ -100,19 +100,23 @@ class UserRoleSeed extends Seeder
         $data = [
             [
                 'name' => 'Superadmin',
-                'is_default' => 0
+                'is_default' => 0,
+                'type' => 'cms'
             ],
             [
                 'name' => 'Admin',
-                'is_default' => 0
+                'is_default' => 0,
+                'type' => 'cms'
             ],
             [
                 'name' => 'Coordinator',
-                'is_default' => 0
+                'is_default' => 0,
+                'type' => 'mobile'
             ],
             [
                 'name' => 'User',
-                'is_default' => 1
+                'is_default' => 1,
+                'type' => 'mobile'
             ],
         ];
 
@@ -121,12 +125,14 @@ class UserRoleSeed extends Seeder
             if ($created) {
                 $created->update([
                     'name' => $item['name'],
-                    'is_default' => $item['is_default']
+                    'is_default' => $item['is_default'],
+                    'type' => $item['type']
                 ]);
             } else {
                 Role::create([
                     'name' => $item['name'],
-                    'is_default' => $item['is_default']
+                    'is_default' => $item['is_default'],
+                    'type' => $item['type']
                 ]);
             }
         }
