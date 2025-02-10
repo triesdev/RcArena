@@ -68,6 +68,11 @@ class UserController extends ApiController
     public function getByCode($code)
     {
         $data = User::where('user_code', $code)->first();
+
+        if (!$data) {
+            return $this->notFoundResponse("Kode User tidak valid");
+        }
+
         return $this->successResponse("Success", $data);
     }
 
