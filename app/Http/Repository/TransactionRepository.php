@@ -102,7 +102,7 @@ class TransactionRepository extends ApiController
     public function getTicketsByTransactionId($transaction_id, $auth_user)
     {
         $user_id = $auth_user->id;
-        return $transactions = Transaction::with(["transaction_detail_users" => function ($q) use ($user_id) {
+        $transactions = Transaction::with(["transaction_detail_users" => function ($q) use ($user_id) {
             $q->leftJoin("transaction_details", "transaction_detail_users.transaction_detail_id", "=", "transaction_details.id")
                 ->leftJoin("tickets", "transaction_details.ticket_id", "=", "tickets.id")
                 ->leftJoin("classes", "tickets.class_id", "=", "classes.id")
