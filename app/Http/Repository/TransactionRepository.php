@@ -27,7 +27,7 @@ class TransactionRepository extends ApiController
                 );
         },'transaction_detail_class_groups'])
             ->leftJoin('events', 'transactions.event_id', '=', 'events.id')
-            ->select('transactions.*', 'events.name as event_name','payments.payment_proof_image_uri','payments.payment_status')
+            ->select('transactions.*', 'events.name as event_name','payments.payment_proof_image_uri','payments.payment_status','payments.note as payment_note')
             ->leftJoin('payments', 'transactions.id', '=', 'payments.transaction_id');
 
         if ($panel) {
