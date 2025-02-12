@@ -100,7 +100,6 @@ class AuthController extends ApiController
                 return $this->errorResponse("Failed to get user data");
             }
 
-
             $userInfo = json_decode($response, true);
             $image_uri = $userInfo['picture'] ?? null;
             $email = $userInfo['email'] ?? null;

@@ -73,6 +73,10 @@ trait FCM {
                     'title' => $data['title'],
                     'body' => $data['message'],
                 ],
+                'data' => [
+                    'page_route' => $data['page_route'],
+                    'reference_id' => $data['reference_id'],
+                ]
             ]
         ];
 

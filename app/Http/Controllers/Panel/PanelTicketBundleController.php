@@ -9,6 +9,14 @@ use Illuminate\Support\Facades\Validator;
 
 class PanelTicketBundleController extends ApiController
 {
+    public function index(Request $request)
+    {
+        $data = TicketBundle::when($request->event_id, function ($q) use ($request) {
+            $q->where('event_id', $request->event_id);
+        })->with('tickets')->get();
+
+        return $this->successResponse("Success", $data);
+    }
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -50,7 +58,7 @@ class PanelTicketBundleController extends ApiController
 
         $class = TicketBundle::find($class_id);
 
-        if($class){
+        if ($class) {
             $class->update($request->all());
             return $this->successResponse();
         }
@@ -62,7 +70,7 @@ class PanelTicketBundleController extends ApiController
     {
         $class = TicketBundle::find($id);
 
-        if($class){
+        if ($class) {
             $class->delete();
             return $this->successResponse();
         }

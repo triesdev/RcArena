@@ -70,7 +70,7 @@
                                                     </button>
                                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                                         <router-link :to="'/panel/event-classes/' + data.id"
-                                                                     class="dropdown-item">
+                                                            class="dropdown-item">
                                                             Kelas Event
                                                         </router-link>
                                                         <router-link :to="'/panel/events/' + data.id"
@@ -135,7 +135,7 @@ export default {
             is_loading.value = true
             event_store.page = page
 
-            getData('events-class/' + id, event_store)
+            getData('events', event_store)
                 .then((data) => {
                     if (data.success) {
                         response.data_content = data.result

@@ -7,7 +7,6 @@ export default function useValidation() {
 
     function getStatus(field) {
         const errors = state.errors
-        console.log(errors[field],'errors field')
         return errors[field] !== undefined
     }
 

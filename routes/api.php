@@ -20,6 +20,7 @@ use App\Http\Controllers\API\TicketUserController;
 use App\Http\Controllers\Panel\EventController as PanelEventController;
 use App\Http\Controllers\Panel\TicketController as PanelTicketController;
 use App\Http\Controllers\Panel\EventClassController as PanelEventClassController;
+use App\Http\Controllers\Panel\PanelTicketBundleController;
 
 use App\Http\Controllers\Panel\FirebaseController;
 
@@ -80,12 +81,12 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
     Route::resource("payment-methods", PaymentMethodController::class);
 });
 
+Route::post("send-notification", [PanelAuthController::class, 'testSendNotification']);
 Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], function () {
     // Auth
     Route::post("login", [PanelAuthController::class, "login"])->withoutMiddleware([PanelToken::class]);
     Route::get("auth", [PanelAuthController::class, "auth"]);
     Route::post("logout", [PanelAuthController::class, "logout"]);
-    Route::post("send-notification", [PanelAuthController::class, 'testSendNotification']);
 
     // Account
     Route::resource("users", UserController::class);
@@ -94,6 +95,7 @@ Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], functio
     Route::resource("menus", MenuController::class);
     Route::resource("menu-role", MenuRoleController::class);
     Route::resource("panel-classes", PanelClassController::class);
+    Route::resource("ticket-bundle", PanelTicketBundleController::class);
 
     Route::resource("transactions", PanelTransactionController::class);
     Route::patch("transaction-payment-process/{payment_id}", [PanelTransactionController::class, "paymentProcess"]);

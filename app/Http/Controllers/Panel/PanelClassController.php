@@ -14,7 +14,7 @@ class PanelClassController extends ApiController
     {
         $data = ClassModel::when($request->event_id, function ($q) use ($request) {
             $q->where('event_id', $request->event_id);
-        })->get();
+        })->with('ticket')->get();
 
         return $this->successResponse("Success", $data);
     }
@@ -54,7 +54,7 @@ class PanelClassController extends ApiController
 
         $class = ClassModel::find($class_id);
 
-        if($class){
+        if ($class) {
             $class->update($request->all());
             return $this->successResponse();
         }
@@ -66,7 +66,7 @@ class PanelClassController extends ApiController
     {
         $class = ClassModel::find($id);
 
-        if($class){
+        if ($class) {
             $class->delete();
             return $this->successResponse();
         }

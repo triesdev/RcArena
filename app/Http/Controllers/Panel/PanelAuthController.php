@@ -95,13 +95,23 @@ class PanelAuthController extends PanelController
         return $this->successResponse("Success");
     }
 
-    public function testSendNotification()
+    public function testSendNotification(Request $request)
     {
-        $reg_id = 'exBZc8L6QySRNg-yxVUyse:APA91bERzz5JbGRHgWSgag4v5Bvz3Q8uhWdDulaZDA2J_YShJBwhGSl1b8mTf5cOdES48R4p4ISrcns8XrO6zWxb0dmWoh1AzDySp_e4OguHE8Sza_hZD7vFHxo5LhbPRaFpZJmUsvb8';
+        $validator = Validator::make($request->all(),[
+           'fcm_token' => 'required',
+           'title' => 'required',
+           'message' => 'required',
+        ]);
 
-        return $this->sendNotification($reg_id, [
-            'title'=> "Notification",
-            'message' => "Notification active"
+        if($validator->fails()){
+            return $this->errorResponse($validator->errors()->first());
+        }
+
+        return $this->sendNotification($request->fcm_token, [
+            'title'=> $request->title,
+            'message' => $request->message,
+            "page_route"=> $request->page_route,
+            "reference_id" => $request->reference_id
         ]);
     }
 }
