@@ -28,6 +28,9 @@ use App\Http\Controllers\Panel\FirebaseController;
 use App\Http\Controllers\Panel\TransactionController as PanelTransactionController;
 use App\Http\Controllers\Panel\PaymentMethodController as PanelPaymentMethodController;
 use App\Http\Controllers\Panel\PanelClassController;
+use App\Http\Controllers\Panel\EventController as PanelEventController;
+use App\Http\Controllers\Panel\TicketController as PanelTicketController;
+use App\Http\Controllers\Panel\EventClassController as PanelEventClassController;
 
 Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () {
 
@@ -81,12 +84,12 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
     Route::resource("payment-methods", PaymentMethodController::class);
 });
 
-Route::post("send-notification", [PanelAuthController::class, 'testSendNotification']);
 Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], function () {
     // Auth
     Route::post("login", [PanelAuthController::class, "login"])->withoutMiddleware([PanelToken::class]);
     Route::get("auth", [PanelAuthController::class, "auth"]);
     Route::post("logout", [PanelAuthController::class, "logout"]);
+    Route::post("send-notification", [PanelAuthController::class, 'testSendNotification']);
 
     // Account
     Route::resource("users", UserController::class);
@@ -110,6 +113,17 @@ Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], functio
     Route::get('events-properties', [PanelEventController::class, 'properties']);
     Route::get('ticket-properties', [PanelTicketController::class, 'properties']);
     /*End Properties*/
+
+    /*Tiket*/
+    Route::group(['prefix' => 'tickets'], function () {
+        Route::get("/{ticket_id}", [PanelTicketController::class, 'getByTicketId']);
+        Route::get("participants/{ticket_id}", [PanelTicketController::class, 'getTicketParticipantsByTicketId']);
+    });
+    /*End Ticket*/
+
+    /*Transaction Detail Users*/
+
+    /*End Transaction Detail Users*/
 
     Route::get("menu-tree", [MenuRoleController::class, "menuTree"]);
     Route::post("update-menu-role", [MenuRoleController::class, "update"]);

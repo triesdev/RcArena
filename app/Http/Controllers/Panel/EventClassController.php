@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Panel;
 use App\Http\Controllers\ApiController;
 use App\Models\EventClass;
 use App\Models\Ticket;
+use App\Models\TransactionDetailUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -42,7 +43,11 @@ class EventClassController extends ApiController
 
     public function eventClassVariants($class_id)
     {
-        $tickets = Ticket::where("class_id", $class_id)->get();
+        $tickets = TransactionDetailUser::leftJoin("tickets","tickets.id","=","transaction_detail_users.ticket_id")
+            ->select("tickets.*",DB::raw("count(transaction_detail_users.id) as total_participants"))
+            ->where("transaction_detail_users.class_id",$class_id)
+            ->groupBy("tickets.id")
+            ->get();
         return $this->successResponse("Success", $tickets);
     }
 }

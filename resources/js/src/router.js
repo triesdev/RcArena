@@ -22,12 +22,12 @@ import TransactionsDetail from "../pages/transactions/Detail.vue";
 
 import Event from "../pages/events/Index.vue";
 import EventAddEdit from "../pages/events/AddEdit.vue";
-import EventParticipants from "../pages/events-participants/Index.vue";
 
 import PaymentMethods from "../pages/payment-methods/Index.vue";
 import PaymentMethodsAddEdit from "../pages/payment-methods/AddEdit.vue";
 import EventDetail from "../pages/events/Detail.vue";
-import ParticipantClasses from "../pages/events-participants/ParticipantClasses.vue";
+import EventClasses from "../pages/events-participants/EventClasses.vue";
+import EventVariantParticipants from "../pages/events-participants/EventVariantParticipants.vue";
 
 const routes = [
     {
@@ -57,8 +57,8 @@ const routes = [
 
             { path: 'events', component: Event, meta: { protected: true, title: "Events" } },
             { path: 'events/:id', component: EventAddEdit, meta: { protected: true, title: "Event Update" } },
-            { path: 'event-participants/:id', component: EventParticipants, meta: { protected: true, title: "Event Participants" } },
-            { path: 'event-classes/:id', component: ParticipantClasses, meta: { protected: true, title: "Event Classes" } },
+            { path: 'event-variant-participants/:id', component: EventVariantParticipants, meta: { protected: true, title: "Peserta Kelas" } },
+            { path: 'event-classes/:id', component: EventClasses, meta: { protected: true, title: "Event Classes" } },
             { path: 'events-detail/:id', component: EventDetail, meta: { protected: true, title: "Event Detail" } },
         ]
     },
