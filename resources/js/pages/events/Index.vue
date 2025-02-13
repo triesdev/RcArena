@@ -69,10 +69,9 @@
                                                         Aksi
                                                     </button>
                                                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                                        <router-link :to="'/panel/event-classes/' + data.id"
-                                                            class="dropdown-item">
-                                                            Kelas Event
-                                                        </router-link>
+                                                        <button @click="showModalToDaftarPendaftar(data)" class="dropdown-item">
+                                                            Data Pendaftar
+                                                        </button>
                                                         <router-link :to="'/panel/events/' + data.id"
                                                             class="dropdown-item">
                                                             Edit
@@ -109,6 +108,58 @@
             </div>
             <WidgetContainerModal />
         </div>
+        <!-- Modal Daftar Pendaftar -->
+        <div class="modal fade" id="modalDaftarPendaftar" tabindex="-1" aria-labelledby="modalDaftarPendaftarLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-md modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bolder" id="modalDaftarPendaftarLabel">Data Pendaftar</h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="grid-cols-2">
+                            <div class="col-span-2">
+                                Buka Data Pendaftar Untuk Event:
+                                <br>
+                                <h4 v-if="modal_daftar_pendaftar_event" class="fw-bolder mt-2">{{modal_daftar_pendaftar_event.name}}</h4>
+                            </div>
+                            <div class="col-span-2 mt-4">
+                                <h6 class="fw-bold">Kelas</h6>
+                                <vSelect
+                                    v-model="modal_daftar_form.class_id"
+                                    :options="modal_daftar_classes"
+                                    :reduce="item => item.id"
+                                    label="name"
+                                >
+                                </vSelect>
+                                <div v-if="modal_daftar_form_errors.class_id" class="text-danger mt-1">
+                                    {{ modal_daftar_form_errors.class_id }}
+                                </div>
+                            </div>
+                            <div class="col-span-2 mt-4">
+                                <h6 class="fw-bold">Varian</h6>
+                                <vSelect
+                                    v-model="modal_daftar_form.variant_id"
+                                    :options="modal_daftar_variants"
+                                    :reduce="item => item.id"
+                                    label="name"
+                                >
+                                </vSelect>
+                                <div v-if="modal_daftar_form_errors.variant_id" class="text-danger mt-1">
+                                    {{ modal_daftar_form_errors.variant_id }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button @click="closeModalDaftarPendaftar()" type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                        <button @click="redirectToDetailParticipants(modal_daftar_form.class_id)" type="button"
+                            class="btn btn-primary">Lihat Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Modal Daftar Pendaftar -->
     </div>
 </template>
 <script>
@@ -117,12 +168,14 @@ import PerPage from '../../components/PerPage'
 import StatusDefault from '../../components/StatusDefault'
 import useAxios from "../../src/service";
 import DeleteModal from "./DeleteModal"
-import { reactive, ref } from "vue";
-import { container, promptModal } from "jenesius-vue-modal";
+import {onMounted, reactive, ref, watch} from "vue";
+import {closeModal, container, promptModal} from "jenesius-vue-modal";
 import SwalToast from '../../src/swal_toast'
 import { useFilterStore } from "../../src/store_filter";
+import {useRouter} from "vue-router";
 
 export default {
+    methods: {closeModal},
     components: { Breadcrumb, PerPage, WidgetContainerModal: container, StatusDefault },
     setup() {
         const title = "Data Event"
@@ -130,12 +183,13 @@ export default {
         const { getData, deleteData } = useAxios()
         const is_loading = ref(true)
         const { event_store } = useFilterStore()
+        const router = useRouter();
 
         function loadDataContent(page = 1) {
             is_loading.value = true
             event_store.page = page
 
-            getData('events', event_store)
+            getData('events/', event_store)
                 .then((data) => {
                     if (data.success) {
                         response.data_content = data.result
@@ -168,15 +222,115 @@ export default {
             }
         }
 
+
+        const modalDaftarPendaftar = ref(null)
+        onMounted(() => {
+            // Initiate Bootstrap Modal
+            modalDaftarPendaftar.value = new bootstrap.Modal(document.getElementById('modalDaftarPendaftar'), {
+                keyboard: false,
+                backdrop: 'static'
+            })
+        })
+
+
+        const modal_daftar_pendaftar_event = ref(null);
+        const modal_daftar_classes = ref([]);
+        const modal_daftar_variants = ref([]);
+        const modal_daftar_form = ref({
+            event_id: null,
+            class_id: null,
+            variant_id: null
+        })
+        const modal_daftar_form_errors = ref({
+            class_id: null,
+            variant_id: null
+        })
+        function showModalToDaftarPendaftar(data) {
+            // Refresh errors
+            modal_daftar_form_errors.value = {
+                class_id: null,
+                variant_id: null
+            }
+            modalDaftarPendaftar.value.show()
+            modal_daftar_pendaftar_event.value = data
+            modal_daftar_form.value.event_id = data.id
+            getDataModalClasses(data.id)
+        }
+
+        const getDataModalClasses = (event_id) => {
+            // Reset Variant ID FORM
+            modal_daftar_form.value.class_id = null
+
+            getData('events-class/' + event_id, {
+                per_page: 100,
+            })
+                .then((data) => {
+                    if (data.success) {
+                        modal_daftar_classes.value = data.result.data
+                    }
+                })
+        }
+
+        const getDataModalVariants = (class_id) => {
+            getData('events-class-variants/' + class_id,{
+                per_page: 100
+            })
+                .then((data) => {
+                    if (data.success) {
+                        modal_daftar_variants.value = data.result
+                    }
+                })
+        }
+
+        watch(() => modal_daftar_form.value.class_id, (newClassId, oldClassId) => {
+            if (newClassId != oldClassId){
+                getDataModalVariants(newClassId);
+            }
+        }, {deep: true});
+
+        const redirectToDetailParticipants = (class_id) => {
+
+            // Check Form Validation
+            if (!modal_daftar_form.value.class_id) {
+                modal_daftar_form_errors.value.class_id = 'Kelas harus diisi.'
+                return
+            }
+
+            if (!modal_daftar_form.value.variant_id) {
+                modal_daftar_form_errors.value.variant_id = 'Varian harus diisi.'
+                return
+            }
+
+           router.push(`/panel/event-variant-participants/${class_id}`)
+        }
+
+        const closeModalDaftarPendaftar = () => {
+            modalDaftarPendaftar.value.hide()
+        }
+
+        // Close After Redirect
+        router.afterEach(() => {
+            closeModalDaftarPendaftar()
+        })
+
         return {
             breadcrumb_list,
             title,
             response,
             is_loading,
             event_store,
+            modal_daftar_pendaftar_event,
+            modal_daftar_variants,
+            modal_daftar_classes,
+            modal_daftar_form,
+            modal_daftar_form_errors,
             loadDataContent,
             changePerPage,
-            deleteModal
+            deleteModal,
+            showModalToDaftarPendaftar,
+            getDataModalVariants,
+            redirectToDetailParticipants,
+            closeModalDaftarPendaftar
         }
     }
 }

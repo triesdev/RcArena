@@ -22,13 +22,15 @@ import TransactionsDetail from "../pages/transactions/Detail.vue";
 
 import Event from "../pages/events/Index.vue";
 import EventAddEdit from "../pages/events/AddEdit.vue";
-import EventParticipants from "../pages/events-participants/Index.vue";
 
 import PaymentMethods from "../pages/payment-methods/Index.vue";
 import PaymentMethodsAddEdit from "../pages/payment-methods/AddEdit.vue";
 import EventDetail from "../pages/events/Detail.vue";
+
 import ParticipantClasses from "../pages/events-participants/ParticipantClasses.vue";
 import EditAddTicketBundle from "../pages/events/EditAddTicketBundle.vue";
+import EventClasses from "../pages/events-participants/EventClasses.vue";
+import EventVariantParticipants from "../pages/events-participants/EventVariantParticipants.vue";
 
 const routes = [
     {
@@ -62,6 +64,8 @@ const routes = [
             { path: 'event-classes/:id', component: ParticipantClasses, meta: { protected: true, title: "Event Classes" } },
             { path: 'events-detail/:id', name: "event-detail", component: EventDetail, meta: { protected: true, title: "Event Detail" } },
             { path: 'ticket-bundle/:event_id/:id', component: EditAddTicketBundle, meta: { protected: true, title: "Ticket Bundle" } },
+            { path: 'event-variant-participants/:id', component: EventVariantParticipants, meta: { protected: true, title: "Peserta Kelas" } },
+            { path: 'event-classes/:id', component: EventClasses, meta: { protected: true, title: "Event Classes" } },
         ]
     },
     { path: "/auth/404", name: "not-found", component: NotFound },

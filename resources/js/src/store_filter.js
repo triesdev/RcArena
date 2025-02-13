@@ -67,6 +67,12 @@ export const useFilterStore = defineStore('filter', () => {
         name: '',
     })
 
+    const tickets_participant_store = reactive({
+        page: 1,
+        per_page: 10000,
+        search_id_ticket_or_participant_name: '',
+    })
+
     const role_store = reactive({
         page: 1
     })
@@ -91,5 +97,6 @@ export const useFilterStore = defineStore('filter', () => {
         presence_store,
         post_store,
         payment_method_store,
+        tickets_participant_store
     }
 })

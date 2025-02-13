@@ -92,10 +92,11 @@
                             <div class="col-span-2">
                                 <table class="table align-middle table-row-dashed fs-6 gy-5 dataTable no-footer">
                                     <thead>
-                                        <tr>
+                                        <tr class="fw-bolder">
                                             <th>No</th>
                                             <th>Nama</th>
                                             <th>Harga</th>
+                                            <th>Total Peserta</th>
                                             <th>Aksi</th>
                                         </tr>
                                     </thead>
@@ -104,10 +105,11 @@
                                             <td>{{t + 1}}</td>
                                             <td>{{ ticket.name }}</td>
                                             <td>{{ $filter.currency(ticket.price) }}</td>
-                                            <td>{{ ticket.total_participants }}
+                                            <td>
+                                                {{ ticket.total_participants }}
                                             </td>
                                             <td>
-                                                <router-link :to="`/panel/`" class="btn btn-primary btn-sm" @click="editModal(ticket.id)">
+                                                <router-link :to="`/panel/event-variant-participants/` + ticket.id" class="btn btn-primary btn-sm" @click="editModal(ticket.id)">
                                                     <v-icon name="bi-eye" />
                                                 </router-link>
                                             </td>
@@ -130,11 +132,11 @@ import Breadcrumb from "../../components/Breadcrumb";
 import PerPage from '../../components/PerPage'
 import StatusDefault from '../../components/StatusDefault'
 import useAxios from "../../src/service";
-import {onMounted, reactive, ref} from "vue";
+import {onMounted, onBeforeUnmount, reactive, ref} from "vue";
 import { container, promptModal } from "jenesius-vue-modal";
 import SwalToast from '../../src/swal_toast'
 import { useFilterStore } from "../../src/store_filter";
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 
 export default {
     components: { Breadcrumb, PerPage, WidgetContainerModal: container, StatusDefault },
@@ -145,6 +147,7 @@ export default {
         const is_loading = ref(true)
         const { event_store } = useFilterStore()
         const route = useRoute()
+        const router = useRouter()
 
         // Const
         const eventId = ref(null)
@@ -221,6 +224,14 @@ export default {
         const closemodalListVariant = () => {
             $('#modalListVariant').modal('hide')
         }
+
+        const unwatch = router.afterEach(() => {
+            closemodalListVariant();
+        });
+
+        onBeforeUnmount(() => {
+            unwatch();
+        });
 
         return {
             breadcrumb_list,
