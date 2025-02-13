@@ -4,9 +4,10 @@
             <div class="flex justify-between mb-4">
                 <div class="text-xl font-bold mb-4">Paket</div>
                 <div>
-                    <button @click="addModal" class="btn btn-primary btn-sm text-center">
+                    <router-link :to="'/panel/ticket-bundle/' + route.params.id + '/add'"
+                        class="btn btn-primary btn-sm text-center">
                         Tambah Paket
-                    </button>
+                    </router-link>
                 </div>
             </div>
             <div>
@@ -21,41 +22,39 @@
                                     {{ item.is_active === 1 ? "Aktif" : "Tidak Aktif" }}</span>
                             </div>
                         </div>
-                        <div class="text-semibold">
-                            Aksi
+                        <div>
+                            <div class="dropdown">
+                                <button class="btn btn-light dropdown-toggle btn-sm" data-toggle="dropdown">
+                                    Aksi
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <router-link :to="'/panel/ticket-bundle/' + route.params.id + '/' + item.id"
+                                        class="dropdown-item">
+                                        Edit
+                                    </router-link>
+                                    <button class="dropdown-item" @click="deleteModal(item.id)">
+                                        Hapus
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="flex justify-between my-1" v-for="ticket in item.tickets">
+                    <div class="flex justify-between my-2" v-for="ticket in item.tickets">
                         <div>
                             <span class="font-semibold">{{ ticket.name }}</span>
                         </div>
-                        <div>
-                            <span class="mx-1 fw-semibold text-blue-500 cursor-pointer hover:text-blue-600">edit</span>
-                            <span class="mx-1 fw-semibold text-red-500 cursor-pointer hover:text-red-600">hapus</span>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="modal fade" id="editAddModal" tabindex="-1" role="dialog" aria-labelledby="ticketModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="modal-title fw-bolder" id="ticketModalLabel">Kelas</h2>
-                    </div>
-                    <div class="modal-body">
 
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </template>
 <script>
 import { reactive, ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import useAxios from "../../src/service";
+import router from "../../src/router";
 
 export default {
     setup() {
@@ -78,14 +77,6 @@ export default {
             reward: "",
             is_active: "",
         })
-
-        let editAddModal = ref(null);
-        onMounted(() => {
-            const editAddModalElement = document.getElementById('editAddModal');
-            if (editAddModalElement) {
-                editAddModal.value = new bootstrap.Modal(editAddModalElement);
-            }
-        });
 
         function loadTicketBundle() {
             getData("ticket-bundle", {
@@ -110,23 +101,16 @@ export default {
             editAddModal.value.show();
         }
 
-        function showEditModal(data) {
-            form_props.edit_mode = true
-            editAddModal.value.show();
+        function deleteModal() {
 
-            form.id = data.id
-            form.event_id = data.event_id
-            form.event_name = data.event_name
-            form.name = data.name
-            form.price = data.price
-            form.reward = data.reward
         }
 
         return {
             showAddModal,
-            showEditModal,
             form_props,
-            form
+            form,
+            route,
+            deleteModal
         }
     }
 }

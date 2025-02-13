@@ -96,6 +96,7 @@ Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], functio
     Route::resource("menu-role", MenuRoleController::class);
     Route::resource("panel-classes", PanelClassController::class);
     Route::resource("ticket-bundle", PanelTicketBundleController::class);
+    Route::resource("tickets", PanelTicketController::class);
 
     Route::resource("transactions", PanelTransactionController::class);
     Route::patch("transaction-payment-process/{payment_id}", [PanelTransactionController::class, "paymentProcess"]);
@@ -103,8 +104,8 @@ Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], functio
     Route::get("events/class-participants/{id}", [PanelEventController::class, "classParticipants"]);
 
     /*Class*/
-    Route::get('events-class/{event_id}', [PanelEventClassController::class,'eventClasses']);
-    Route::get('events-class-variants/{class_id}', [PanelEventClassController::class,'eventClassVariants']);
+    Route::get('events-class/{event_id}', [PanelEventClassController::class, 'eventClasses']);
+    Route::get('events-class-variants/{class_id}', [PanelEventClassController::class, 'eventClassVariants']);
 
     /*Properties*/
     Route::get('events-properties', [PanelEventController::class, 'properties']);

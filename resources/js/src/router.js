@@ -28,6 +28,7 @@ import PaymentMethods from "../pages/payment-methods/Index.vue";
 import PaymentMethodsAddEdit from "../pages/payment-methods/AddEdit.vue";
 import EventDetail from "../pages/events/Detail.vue";
 import ParticipantClasses from "../pages/events-participants/ParticipantClasses.vue";
+import EditAddTicketBundle from "../pages/events/EditAddTicketBundle.vue";
 
 const routes = [
     {
@@ -59,7 +60,8 @@ const routes = [
             { path: 'events/:id', component: EventAddEdit, meta: { protected: true, title: "Event Update" } },
             { path: 'event-participants/:id', component: EventParticipants, meta: { protected: true, title: "Event Participants" } },
             { path: 'event-classes/:id', component: ParticipantClasses, meta: { protected: true, title: "Event Classes" } },
-            { path: 'events-detail/:id', component: EventDetail, meta: { protected: true, title: "Event Detail" } },
+            { path: 'events-detail/:id', name: "event-detail", component: EventDetail, meta: { protected: true, title: "Event Detail" } },
+            { path: 'ticket-bundle/:event_id/:id', component: EditAddTicketBundle, meta: { protected: true, title: "Ticket Bundle" } },
         ]
     },
     { path: "/auth/404", name: "not-found", component: NotFound },

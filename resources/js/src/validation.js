@@ -18,7 +18,6 @@ export default function useValidation() {
     }
 
     function setErrors(errors) {
-        console.log("SET ERROR", errors)
         state.errors = errors
     }
 

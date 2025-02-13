@@ -66,6 +66,16 @@ export default function useAxios() {
         }
     }
 
+    /*************  ✨ Codeium Command ⭐  *************/
+    /**
+     * Sends a POST request to the specified URL with the given data.
+     * 
+     * @param {string} url - The endpoint URL to which the request is sent.
+     * @param {Object} data - The data to be sent in the body of the POST request.
+     * @returns {Promise<AxiosResponse>} The response from the server.
+     */
+
+    /******  ceb44879-39e4-4863-9572-e4203ff2dc23  *******/
     async function basePostData(url, data) {
         return await axios.post(base_url + url, data, {
             headers: setHeader()

@@ -174,9 +174,9 @@ class CartController extends ApiController
         if (($qty_cart + 1) > $ticket->quota_left) {
             $this->ticket_stock_check[] = [
                 'ticket_id' => $ticket->id,
-                'message' => 'Ticket out of stock',
+                'message' => 'Tiket Habis',
             ];
-            $this->message = 'Ticket out of stock';
+            $this->message = 'Tiket Habis';
             $this->empty_tickets[] = " - " . $ticket->name . " \n ";
             return;
         }
@@ -315,9 +315,9 @@ class CartController extends ApiController
             if ($cart->qty > $cart->quota_left) {
                 $this->ticket_stock_check[] = [
                     'ticket_id' => $cart->ticket_id,
-                    'message' => 'Ticket out of stock',
+                    'message' => 'Tiket Habis',
                 ];
-                $this->message = 'Ticket out of stock';
+                $this->message = 'Tiket Habis';
             } else if ($cart->qty == 0) {
                 $this->response_ticket[] = $cart;
                 // DELETE CART
@@ -354,9 +354,9 @@ class CartController extends ApiController
         if ($cart->qty > $ticket->quota_left) {
             $this->ticket_stock_check[] = [
                 'ticket_id' => $ticket_id,
-                'message' => 'Ticket out of stock',
+                'message' => 'Tiket Habis',
             ];
-            $this->message = 'Ticket out of stock';
+            $this->message = 'Tiket Habis';
         } else if ($cart->qty == 0) {
                 $this->response_ticket[] = $cart;
                 // DELETE CART

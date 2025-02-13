@@ -26,7 +26,7 @@
                         </div>
                     </div>
                     <div class="col-span-3">
-                        <DetailTicket></DetailTicket>
+                        <!-- <DetailTicket></DetailTicket> -->
                         <DetailTicketBundle></DetailTicketBundle>
                     </div>
                 </div>

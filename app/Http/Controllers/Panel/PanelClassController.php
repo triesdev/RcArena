@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Panel;
 
 use App\Http\Controllers\ApiController;
 use App\Models\ClassModel;
+use App\Models\Event;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -19,23 +20,34 @@ class PanelClassController extends ApiController
         return $this->successResponse("Success", $data);
     }
 
-    public function create(Request $request)
+    public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'event_id'   => 'required',
-            'event_name' => 'required',
             'name'       => 'required',
             'reward'     => 'required',
             'price'     => 'required',
-            'quota'     => 'required',
             'is_active'  => 'required',
         ]);
 
-        if ($validator->fails()) {
-            return $this->errorResponse($validator->errors()->first(), $validator->errors());
+        $event = Event::find($request->event_id);
+
+        if (!$event) {
+            return $this->errorResponse('Event not found', [], 422);
         }
 
-        ClassModel::create($request->all());
+        if ($validator->fails()) {
+            return $this->errorResponse($validator->errors()->first(), $validator->errors(), 422);
+        }
+
+        ClassModel::create([
+            'event_id'   => $request->event_id,
+            'event_name'   => $event->name,
+            'name'       => $request->name,
+            'reward'     => $request->reward,
+            'price'     => $request->price,
+            'is_active'  => $request->is_active
+        ]);
 
         return $this->createSuccessResponse();
     }
@@ -49,13 +61,18 @@ class PanelClassController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->errorResponse($validator->errors()->first(), $validator->errors());
+            return $this->errorResponse($validator->errors()->first(), $validator->errors(), 422);
         }
 
         $class = ClassModel::find($class_id);
 
         if ($class) {
-            $class->update($request->all());
+            $class->update([
+                'name'       => $request->name,
+                'price'      => $request->price,
+                'reward'     => $request->reward,
+                'is_active'  => $request->is_active
+            ]);
             return $this->successResponse();
         }
 

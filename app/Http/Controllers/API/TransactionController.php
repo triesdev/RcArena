@@ -98,7 +98,7 @@ class TransactionController extends ApiController
                 if ($cart->qty > $cart->quota_left) {
                     DB::rollBack();
                     return $this->errorResponse("Error",[
-                        'message' => 'Out of stock',
+                        'message' => 'Tiket Habis',
                         'id_ticket' => $cart->ticket_id
                     ]);
                 }
@@ -195,7 +195,7 @@ class TransactionController extends ApiController
                 if ($ticket->quota_left < 0) {
                     DB::rollBack();
                     return $this->errorResponse("Error",[
-                        'message' => 'Out of stock',
+                        'message' => 'Tiket Habis',
                         'id_ticket' => $ticket->id
                     ]);
                 }

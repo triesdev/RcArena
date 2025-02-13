@@ -17,6 +17,12 @@ require __DIR__.'/auth.php';
 Route::get('/privacy-policy', function () {
     return view('privacy-policy');
 });
+Route::get('/faq', function () {
+    return view('faq');
+});
+Route::get('/term-condition', function () {
+    return view('term-condition');
+});
 
 Route::get('/delete-account', function () {
     return view('delete-account');
