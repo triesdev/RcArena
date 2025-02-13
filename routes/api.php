@@ -28,9 +28,7 @@ use App\Http\Controllers\Panel\FirebaseController;
 use App\Http\Controllers\Panel\TransactionController as PanelTransactionController;
 use App\Http\Controllers\Panel\PaymentMethodController as PanelPaymentMethodController;
 use App\Http\Controllers\Panel\PanelClassController;
-use App\Http\Controllers\Panel\EventController as PanelEventController;
-use App\Http\Controllers\Panel\TicketController as PanelTicketController;
-use App\Http\Controllers\Panel\EventClassController as PanelEventClassController;
+use App\Http\Controllers\Panel\TransactionDetailUsersController as PanelTransactionDetailUsersController;
 
 Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () {
 
@@ -122,7 +120,9 @@ Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], functio
     /*End Ticket*/
 
     /*Transaction Detail Users*/
-
+    Route::group(['prefix' => 'transaction-detail-users'], function () {
+        Route::patch("/{transaction_detail_users_id}", [PanelTransactionDetailUsersController::class, 'updateParticipantData']);
+    });
     /*End Transaction Detail Users*/
 
     Route::get("menu-tree", [MenuRoleController::class, "menuTree"]);

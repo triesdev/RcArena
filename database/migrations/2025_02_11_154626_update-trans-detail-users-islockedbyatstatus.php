@@ -15,7 +15,7 @@ class UpdateTransDetailUsersIslockedbyatstatus extends Migration
     {
         Schema::table("transaction_detail_users", function (Blueprint $table){
             $table->tinyInteger("is_locked")->default(0);
-            $table->unsignedBigInteger("is_locked_by")->default();
+            $table->unsignedBigInteger("is_locked_by")->nullable();
             $table->dateTime("is_locked_at")->nullable();
         });
     }

@@ -13,7 +13,6 @@
         <div class="app-content flex-column-fluid">
             <div class="app-container container-xxl">
                 <div class="card card-flush fw-bold gap-4 mb-4 py-4 px-8">
-                    {{available_seat}}
                    <div class="flex gap-1">
                        <span class="w-25">
                            Nama Event
@@ -40,6 +39,18 @@
                         <span>
                            {{ticket_data.name}}
                        </span>
+                    </div>
+                    <div class="gap-1 mt-4">
+                        <div class="mb-2">
+                           <span class="w-25 flex items-center">
+                              <v-icon name="bi-exclamation-circle-fill" class="mr-2 text-info"></v-icon> Kursi Tersedia
+                           </span>
+                        </div>
+                        <div>
+                            <span v-for="item in available_seat" class="badge badge-sm badge-success mr-2">
+                                {{item}}
+                            </span>
+                        </div>
                     </div>
                 </div>
                 <div class="card card-flush">
@@ -92,6 +103,7 @@
                                             <td>
                                                <input class="form-control" v-model="data.participant_name"
                                                 placeholder="Nama Peserta"
+                                                :disabled="data.is_locked"
                                                >
                                             </td>
                                             <td>
@@ -100,15 +112,18 @@
                                                     append-to-body
                                                     v-model="data.participant_chair_number"
                                                     :options="available_seat"
+                                                    :disabled="data.is_locked"
                                                 >
                                                 </vSelect>
                                             </td>
                                             <td class="flex justify-end">
-                                                <button v-if="!data.is_locked" @click="saveVariantData" class="btn btn-sm btn-primary">
+                                                <button v-if="!data.is_locked" @click="updateParticipant(data, d)" class="btn btn-sm btn-primary">
                                                     <v-icon name="bi-save"></v-icon>
                                                 </button>
-                                                <button v-else class="btn btn-sm btn-warning">
-                                                    <v-icon name="bi-pencil"></v-icon>
+                                                <button v-else class="btn btn-sm btn-warning"
+                                                @click="openModalEditParticipants(data)"
+                                                >
+                                                    <v-icon name="bi-pen"></v-icon>
                                                 </button>
                                             </td>
                                         </tr>
@@ -132,6 +147,47 @@
             </div>
             <WidgetContainerModal />
         </div>
+        <!-- Modal Edit Participant -->
+        <div id="modalEditParticipant" class="modal fade" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content static">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bolder text-[1.2rem]">Edit Peserta</h5>
+                    </div>
+                    <form @submit.prevent="updateParticipantWithPassword">
+                        <div class="modal-body static">
+                            <div class="w-100">
+                                <label class="mb-1">Nama Peserta</label>
+                                <input v-model="edit_participant_form.participant_name" class="form-control" placeholder="Nama Peserta">
+                                {{getMessage('participant_name')}}
+                            </div>
+                            <div class="w-100 mt-3 static">
+                                <label class="mb-1">No Kursi</label>
+                                <v-select
+                                    class="w-100 custom-v-select-participants custom-v-select-static"
+                                    v-model="edit_participant_form.participant_chair_number"
+                                    :options="available_seat"
+                                >
+                                </v-select>
+                                {{getMessage('participant_chair_number')}}
+                            </div>
+                            <hr class="my-5" />
+                            <div class="w-100">
+                                <label class="mb-1">Password</label>
+                                <input v-model="edit_participant_form.password" type="password" class="form-control" placeholder="Password">
+                                {{getMessage('password')}}
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button @click="closeModalEditParticipant" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                            <button :disabled="is_loading_edit_participants" type="submit" class="btn btn-warning flex items-center">
+                                <v-icon name="bi-pen" class="mr-2"></v-icon> Simpan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 <script>
@@ -139,18 +195,20 @@ import Breadcrumb from "../../components/Breadcrumb";
 import PerPage from '../../components/PerPage'
 import StatusDefault from '../../components/StatusDefault'
 import useAxios from "../../src/service";
-import { reactive, ref } from "vue";
+import { reactive, ref, onMounted, onBeforeUnmount } from "vue";
 import { container, promptModal } from "jenesius-vue-modal";
 import SwalToast from '../../src/swal_toast'
 import { useFilterStore } from "../../src/store_filter";
 import {useRoute} from "vue-router";
+import useValidation from "../../src/validation";
 
 export default {
     components: { Breadcrumb, PerPage, WidgetContainerModal: container, StatusDefault },
     setup() {
         const title = "Detail Data Pendaftar"
         const breadcrumb_list = ["Event","Variants", "Participants"];
-        const { getData, deleteData } = useAxios()
+        const { getData, basePatchData } = useAxios()
+        const { setErrors, getMessage, resetErrors, getStatus, removeError } = useValidation()
         const is_loading = ref(true)
         const { tickets_participant_store } = useFilterStore()
         const route = useRoute()
@@ -220,8 +278,107 @@ export default {
             // }
         }
 
-        const saveVariantData = (data) => {
+        const updateParticipant = (data, index) => {
+            const transaction_detail_user_id = data.id
 
+            is_loading.value = true
+            basePatchData('transaction-detail-users/' + transaction_detail_user_id, {
+                participant_name: data.participant_name,
+                participant_chair_number: data.participant_chair_number,
+                password: '',
+                edit: false,
+            }).then(() => {
+                // Change is locked base on index from response data content
+                response.data_content.data[index].is_locked = true
+
+                // Filter Available Seat
+                available_seat.value = filterAvailableSeatBaseOnDataTicket(response.data_content.data)
+
+                SwalToast('Berhasil mengubah data.')
+                is_loading.value = false
+            }).catch((error) => {
+                console.log(error);
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Gagal Rubah Data',
+                    text: 'Silahkan cek kembali data anda !',
+                    // text: error,
+                });
+                is_loading.value = false
+            })
+        }
+
+        const modalEditParticipant = ref(null)
+        const openModalEditParticipants = (data) => {
+            modalEditParticipant.value.show()
+            edit_participant_form.value.id = data.id;
+            edit_participant_form.value.participant_name = data.participant_name;
+            edit_participant_form.value.participant_chair_number = data.participant_chair_number;
+            edit_participant_form.value.password = '';
+
+            // Add existing chair number to option participant_chair_number list and sort asc
+            available_seat.value.push(data.participant_chair_number);
+            available_seat.value.sort((a, b) => a - b);
+
+        }
+
+        onMounted(() => {
+            modalEditParticipant.value = new bootstrap.Modal(document.getElementById('modalEditParticipant'), {
+                keyboard: false,
+                backdrop: 'static'
+            })
+        })
+
+        const edit_participant_form = ref({
+            id: '',
+            participant_name: '',
+            participant_chair_number: '',
+            password: '',
+        })
+
+        const is_loading_edit_participants = ref(false)
+
+        const updateParticipantWithPassword = () => {
+            is_loading_edit_participants.value = true
+            basePatchData('transaction-detail-users/' + edit_participant_form.value.id, {
+                participant_name: edit_participant_form.value.participant_name,
+                participant_chair_number: edit_participant_form.value.participant_chair_number,
+                password: edit_participant_form.value.password,
+                edit: true,
+            }).then(() => {
+                // Filter Available Seat
+                available_seat.value = filterAvailableSeatBaseOnDataTicket(response.data_content.data)
+
+                SwalToast('Berhasil mengubah data.')
+                modalEditParticipant.value.hide()
+
+                loadDataContent()
+            }).catch((error) => {
+                // IF STATUS 401
+                if (error.response.status === 401) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Password Salah',
+                        text: 'Silahkan cek kembali data anda !',
+                        // text: error,
+                    });
+                }
+
+                // IF STATUS 400 (Validation Field)
+                if (error.response.status === 400) {
+                    setErrors(error.response.data.errors)
+                }
+
+            }).finally(() => {
+                is_loading_edit_participants.value = false
+            })
+        }
+
+        const closeModalEditParticipant = () => {
+            modalEditParticipant.value.hide()
+            resetErrors()
+
+            available_seat.value = filterAvailableSeatBaseOnDataTicket(response.data_content.data)
         }
 
         return {
@@ -232,10 +389,23 @@ export default {
             tickets_participant_store,
             ticket_data,
             available_seat,
+            edit_participant_form,
+            is_loading_edit_participants,
             loadDataContent,
             changePerPage,
             deleteModal,
-            saveVariantData,
+            updateParticipant,
+            openModalEditParticipants,
+            closeModalEditParticipant,
+            updateParticipantWithPassword,
+
+            //Element
+            modalEditParticipant,
+
+            // Validation
+            getMessage,
+            setErrors,
+            resetErrors,
         }
     }
 }
@@ -253,5 +423,15 @@ export default {
     font-weight: 500;
     line-height: 1.5;
     border-radius: .475rem;
+}
+.custom-v-select-static .vs__dropdown-toggle,
+.custom-v-select-static.v-select {
+    position: static !important;
+}
+
+.custom-v-select-static .vs__dropdown-menu{
+    top: auto !important;
+    width: 90% !important;
+    left: auto !important;
 }
 </style>
