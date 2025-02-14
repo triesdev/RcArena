@@ -99,6 +99,7 @@ class UserController extends ApiController
             'name' => $request->name,
             'phone_number' => $request->phone_number,
             'role_id' => $role_id_default_mobile,
+            'image_uri' => $request->image_uri,
         ]);
 
         return $this->successResponse("Success", $data);
