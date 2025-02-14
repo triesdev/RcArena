@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Panel;
 
 use App\Http\Traits\FCM;
+use App\Models\Notification;
 use App\Models\User;
 use App\Utils\StringGenerator;
 use Illuminate\Http\Request;
@@ -107,11 +108,74 @@ class PanelAuthController extends PanelController
             return $this->errorResponse($validator->errors()->first());
         }
 
-        return $this->sendNotification($request->fcm_token, [
-            'title'=> $request->title,
-            'message' => $request->message,
-            "page_route"=> $request->page_route,
-            "reference_id" => $request->reference_id
+        $user = User::where('fcm_token', $request->fcm_token)
+            ->first();
+
+        $notification = Notification::create([
+            "user_id" => $user ? $user->id : null,
+            "category" => "information",
+            "label" => "general_info",
+            "flag" => "info",
+            "title" => $request->title,
+            "message" => $request->message,
+            "page_route" => $request->page_route,
+            "reference_id" => $request->reference_id,
+            "status" => 1,
         ]);
+
+        try{
+            $send = $this->sendNotification($request->fcm_token, [
+                'title'=> $request->title,
+                'message' => $request->message,
+                "page_route"=> $request->page_route,
+                "reference_id" => $request->reference_id
+            ]);
+
+            return $this->successResponse("success",$send);
+        }catch (\Exception $e){
+            $notification->update([
+               'status'=>2
+            ]);
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    public function sendNotificationTopic(Request $request)
+    {
+        $validator = Validator::make($request->all(),[
+           'title' => 'required',
+           'message' => 'required',
+        ]);
+
+        if($validator->fails()){
+            return $this->errorResponse($validator->errors()->first());
+        }
+
+        $notification = Notification::create([
+            "category" => "information",
+            "label" => "general_info",
+            "flag" => "info",
+            "title" => $request->title,
+            "message" => $request->message,
+            "page_route" => $request->page_route,
+            "reference_id" => $request->reference_id,
+            "status" => 1,
+        ]);
+
+        try{
+            $send = $this->sendNotifByTopic("general_info", [
+                'title'=> $request->title,
+                'message' => $request->message,
+                "page_route"=> $request->page_route,
+                "reference_id" => $request->reference_id
+            ]);
+
+            return $this->successResponse("Notif by topic", $send);
+        } catch (\Exception $e){
+            $notification->update([
+               'status' => 2
+            ]);
+            return $this->errorResponse($e->getMessage());
+        }
     }
 }

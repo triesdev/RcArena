@@ -21,6 +21,7 @@ use App\Http\Controllers\Panel\EventController as PanelEventController;
 use App\Http\Controllers\Panel\TicketController as PanelTicketController;
 use App\Http\Controllers\Panel\EventClassController as PanelEventClassController;
 use App\Http\Controllers\Panel\PanelTicketBundleController;
+use App\Http\Controllers\API\NotificationController;
 
 use App\Http\Controllers\Panel\FirebaseController;
 
@@ -80,14 +81,17 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
 
     // Payment Methods
     Route::resource("payment-methods", PaymentMethodController::class);
+
+    Route::get("notification", [NotificationController::class, 'index']);
 });
 
+Route::post("send-notification", [PanelAuthController::class, 'testSendNotification']);
+Route::post("send-notification-topic", [PanelAuthController::class, 'sendNotificationTopic']);
 Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], function () {
     // Auth
     Route::post("login", [PanelAuthController::class, "login"])->withoutMiddleware([PanelToken::class]);
     Route::get("auth", [PanelAuthController::class, "auth"]);
     Route::post("logout", [PanelAuthController::class, "logout"]);
-    Route::post("send-notification", [PanelAuthController::class, 'testSendNotification']);
 
     // Account
     Route::resource("users", UserController::class);

@@ -4,7 +4,8 @@ namespace App\Http\Traits;
 
 use Google\Auth\Credentials\ServiceAccountCredentials;
 
-trait FCM {
+trait FCM
+{
     protected $client;
     protected $projectId;
     protected $base_url;
@@ -17,7 +18,7 @@ trait FCM {
     public function getAccessToken()
     {
         $this->projectId = env('FCM_PROJECT_ID');
-        $this->base_url = 'https://fcm.googleapis.com/v1/projects/' . $this->projectId .'/';
+        $this->base_url = 'https://fcm.googleapis.com/v1/projects/' . $this->projectId . '/';
 
         $credentialsPath = base_path('rcarena-pk.json');
 
@@ -37,7 +38,8 @@ trait FCM {
     /**
      * Send Notification to a Single FCM Token
      */
-    public function sendNotification($fcmToken = "", $data = []) {
+    public function sendNotification($fcmToken = "", $data = [])
+    {
 
         $response = [
             'status' => false,
@@ -81,46 +83,47 @@ trait FCM {
         ];
 
         // Send the request
-//        try {
-            $ch = curl_init();
+        //        try {
+        $ch = curl_init();
 
-            curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/v1/projects/'.$this->projectId.'/messages:send');
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_POST, 1);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/v1/projects/' . $this->projectId . '/messages:send');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 
-            $headers = [
-                'Content-Type: application/json',
-                'Authorization: Bearer '.$accessToken,
-            ];
+        $headers = [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $accessToken,
+        ];
 
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-            $res = curl_exec($ch);
-            if (curl_errno($ch)) {
-                echo 'Error:' . curl_error($ch);
-            }
-            curl_close($ch);
+        $res = curl_exec($ch);
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
+        }
+        curl_close($ch);
 
-            return $res;
-//
-//            $response['status'] = true;
-//            $response['text'] = "Success";
-//            $response['response'] = $res;
-//            $response['payload'] = $payload;
-//            $response['header'] = $headers;
-//        } catch (\Exception $e) {
-//            $response['text'] = $e->getMessage();
-//            return $response;
-//        }
-//
-//        return $response;
+        return $res;
+        //
+        //            $response['status'] = true;
+        //            $response['text'] = "Success";
+        //            $response['response'] = $res;
+        //            $response['payload'] = $payload;
+        //            $response['header'] = $headers;
+        //        } catch (\Exception $e) {
+        //            $response['text'] = $e->getMessage();
+        //            return $response;
+        //        }
+        //
+        //        return $response;
     }
 
     /**
      * Send Notification to Multiple FCM Tokens
      */
-    public function sendMultipleNotif($fcmTokens, $data = []) {
+    public function sendMultipleNotif($fcmTokens, $data = [])
+    {
         $response = [
             'status' => false,
             'text' => "",
@@ -228,7 +231,8 @@ trait FCM {
     /**
      * Send Notification to a Topic
      */
-    public function sendNotifByTopic($topic = "cusgeneral", $data = []) {
+    public function sendNotifByTopic($topic = "general_info", $data = [])
+    {
         $response = [
             'status' => false,
             'text' => "",
@@ -280,7 +284,7 @@ trait FCM {
         try {
             $ch = curl_init();
 
-            curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/v1/projects/'.$this->projectId.'/messages:send');
+            curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/v1/projects/' . $this->projectId . '/messages:send');
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
@@ -296,8 +300,6 @@ trait FCM {
             $response['status'] = true;
             $response['text'] = "Success";
             $response['response'] = $responseBody;
-
-            Log::info($response);
         } catch (\Exception $e) {
             $response['text'] = $e->getMessage();
         }
