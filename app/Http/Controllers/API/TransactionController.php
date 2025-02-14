@@ -226,12 +226,17 @@ class TransactionController extends ApiController
             transactions.payment_limit_date,
             transactions.unique_code_price,
             transactions.total_price,
+            transactions.transaction_status,
             SUM(transaction_details.qty) as total_qty"
         ))
         ->with('user', function ($q){
             $q->select("id","name","email","phone_number");
         })
         ->find($id);
+
+        if($transaction->transaction_status == 'unpaid' && strtotime($transaction->payment_limit_date) < strtotime(now())){
+            return $this->errorResponse("Payment Expired");
+        }
 
         if(!$transaction){
             return $this->errorResponse("Data not found");

@@ -35,6 +35,12 @@ class PaymentController extends ApiController
             return $this->errorResponse("Transaction already paid");
         }
 
+        // Check If Expired Payment Limit Date
+        if($transaction->transaction_status == 'unpaid' && strtotime($transaction->payment_limit_date) < strtotime(now())){
+            return $this->errorResponse("Payment Expired");
+        }
+
+
         $payment = Payment::where('transaction_id', $request->transaction_id)->first();
 
         if($payment){

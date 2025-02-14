@@ -41,6 +41,13 @@ class TransactionRepository extends ApiController
             return null;
         }
 
+        // Inject Status Payment
+        // if transaction_status = 'unpaid' and payment limit date expired
+        $transaction->is_payment_expired = false;
+        if ($transaction->transaction_status == 'unpaid' && strtotime($transaction->payment_limit_date) < strtotime(date('Y-m-d H:i:s'))) {
+            $transaction->is_payment_expired = true;
+        }
+
         // Convert Data
         $data = $transaction->transaction_detail_class_groups->map(function ($group) use ($transaction) {
             $group->transaction_details = $transaction->transaction_details->filter(function ($detail) use ($group) {
