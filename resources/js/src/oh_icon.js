@@ -1,7 +1,8 @@
-import {OhVueIcon, addIcons} from "oh-vue-icons";
+import { OhVueIcon, addIcons } from "oh-vue-icons";
 import {
     BiArchive,
     BiArrowLeft,
+    BiBell,
     BiBezier2,
     BiBookmarkStar,
     BiCameraVideo,
@@ -28,13 +29,15 @@ import {
     BiTicketDetailed,
     BiTrash,
     BiVectorPen,
-    BiWhatsapp, BiPen,
+    BiWhatsapp,
+    BiPen
 } from "oh-vue-icons/icons/bi";
 
 addIcons(
     BiArchive,
     BiArrowLeft,
     BiBezier2,
+    BiBell,
     BiBookmarkStar,
     BiCameraVideo,
     BiCash,

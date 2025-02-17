@@ -23,6 +23,7 @@ class CreateNotificationsTable extends Migration
             $table->string('message');
             $table->string('page_route')->nullable();
             $table->string('reference_id')->nullable();
+            $table->boolean('is_read')->default(0);
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });

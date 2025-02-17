@@ -85,6 +85,15 @@ export const useFilterStore = defineStore('filter', () => {
         formatted: "ll"
     })
 
+    const money_config = {
+        decimal: ',',
+        thousands: '.',
+        prefix: '',
+        suffix: '',
+        precision: 0,
+        masked: false
+    }
+
     return {
         role_store,
         category_store,
@@ -97,6 +106,7 @@ export const useFilterStore = defineStore('filter', () => {
         presence_store,
         post_store,
         payment_method_store,
-        tickets_participant_store
+        tickets_participant_store,
+        money_config
     }
 })

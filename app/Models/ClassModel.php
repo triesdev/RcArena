@@ -18,6 +18,6 @@ class ClassModel extends Model
 
     public function ticket()
     {
-        return $this->hasMany(Ticket::class, 'class_id', 'id')->where('ticket_bundle_id', null);
+        return $this->hasMany(Ticket::class, 'class_id', 'id');
     }
 }

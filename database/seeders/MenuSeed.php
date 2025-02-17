@@ -37,6 +37,13 @@ class MenuSeed extends Seeder
                     ],
                 ]
             ],
+            [
+                'title'    => "Notifikasi",
+                'icon'     => "bi-bell",
+                'url'      => "/panel/notifications",
+                'type'     => "menu",
+                'children' => []
+            ],
 
             [
                 'title'    => "Master Data",

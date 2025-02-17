@@ -115,7 +115,6 @@
                                     {{ getMessage('role_id') }}
                                 </div>
                             </div>
-                            <!-- image_uri: '', -->
                         </div>
                     </div>
                 </div>

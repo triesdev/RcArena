@@ -20,16 +20,15 @@ class UserController extends ApiController
             })
             ->when($request->role, function ($query) use ($request) {
                 $role_ids = [];
-                if($request->role == 'admin'){
+                if ($request->role == 'admin') {
                     $env_admin = env('ROLE_ADMIN');
                     $role_ids = explode(",", $env_admin);
-                } else if ($request->role == 'user'){
+                } else if ($request->role == 'user') {
                     $env_user = env('ROLE_USER');
                     $role_ids = explode(",", $env_user);
                 }
 
-                if(count($role_ids) > 0){
-                    error_log(json_encode($role_ids));
+                if (count($role_ids) > 0) {
                     return $query->whereIn('role_id', $role_ids);
                 }
             })
@@ -98,7 +97,7 @@ class UserController extends ApiController
         $data->update([
             'name' => $request->name,
             'phone_number' => $request->phone_number,
-            'role_id' => $role_id_default_mobile,
+            'role_id' => $request->role_id,
             'image_uri' => $request->image_uri,
         ]);
 

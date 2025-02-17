@@ -62,9 +62,6 @@ trait FCM
             return $response;
         }
 
-        $data['route'] = $data['route'] ?? "/main_home";
-        $data['id'] = $data['id'] ?? 0;
-
         // Generate Access Token
         $accessToken = $this->getAccessToken()['access_token'];
 
@@ -254,9 +251,6 @@ trait FCM
             return $response;
         }
 
-        $data['route'] = $data['route'] ?? "/main_home";
-        $data['id'] = $data['id'] ?? 0;
-
         // Generate Access Token
         $accessToken = $this->getAccessToken()['access_token'];
 
@@ -274,8 +268,8 @@ trait FCM
                     'body' => $data['message'],
                 ],
                 'data' => [
-                    'page_route' => $data['route'],
-                    'id' => (string) $data['id'],
+                    'page_route' => $data['page_route'],
+                    'reference_id' => (string) $data['reference_id'],
                 ]
             ]
         ];

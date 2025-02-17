@@ -22,14 +22,14 @@
             </div>
             <div class="mb-5 col-md-12 fv-row fv-plugins-icon-container">
               <label class="form-label text-slate-400">Harga</label>
-              <input type="text" class="form-control form-control-sm mb-2" v-model="form.price">
+              <money3 class="form-control form-control-sm mb-2" v-model="form.price" v-bind="money_config"></money3>
               <div class="fv-plugins-message-container invalid-feedback" v-if="getStatus('price')">
                 {{ getMessage('price') }}
               </div>
             </div>
           </div>
           <div class="mb-4">
-            <button @click="showTicketModal()" class="btn btn-primary">
+            <button @click="showTicketModal()" class="btn btn-sm btn-primary">
               Tambah Varian
             </button>
           </div>
@@ -75,15 +75,24 @@
                   </tr>
                 </tbody>
               </table>
+              <div class="fv-plugins-message-container invalid-feedback" v-if="getStatus('tickets')">
+                {{ getMessage('tickets') }}
+              </div>
             </div>
           </div>
         </div>
         <div class="mb-4 text-right">
-          <button @click="addTicketBundle()" class="btn btn-primary" v-if="!form_props.edit_mode">
-            Tambah
+          <button @click="addTicketBundle()" class="btn btn-sm btn-primary" v-if="!form_props.edit_mode">
+            <span v-if="!form_props.is_loading">Tambah</span>
+            <span v-if="form_props.is_loading">Please wait...
+              <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+            </span>
           </button>
-          <button @click="editTicketBundle()" class="btn btn-primary" v-if="form_props.edit_mode">
-            Simpan
+          <button @click="editTicketBundle()" class="btn btn-sm btn-primary" v-if="form_props.edit_mode">
+            <span v-if="!form_props.is_loading">Simpan</span>
+            <span v-if="form_props.is_loading">Please wait...
+              <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+            </span>
           </button>
         </div>
       </div>
@@ -123,7 +132,7 @@
                 </div>
               </div>
               <div class="text-right">
-                <button class="btn btn-secondary" @click="closeTicketModal()">Selesai</button>
+                <button class="btn btn-sm btn-secondary" @click="closeTicketModal()">Selesai</button>
               </div>
             </div>
           </div>
@@ -138,15 +147,16 @@ import { reactive, ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import useAxios from "../../src/service";
 import useValidation from "../../src/validation";
-
+import { Money3Component } from 'v-money3'
+import { useFilterStore } from "../../src/store_filter";
 export default {
-  components: { Breadcrumb },
+  components: { Breadcrumb, money3: Money3Component },
   setup() {
     const { postData, getData, patchData } = useAxios()
     const router = useRouter()
     const route = useRoute()
     const { setErrors, getStatus, getMessage, resetErrors } = useValidation()
-
+    const { money_config } = useFilterStore()
     // Cek Mode
     const form_props = reactive({
       is_loading: false,
@@ -227,12 +237,14 @@ export default {
     }
 
     function editTicketBundle() {
+      form_props.is_loading = true
       patchData("ticket-bundle/" + form.id, {
         event_id: form.event_id,
         name: form.name,
         price: form.price,
         tickets: form.tickets
       }).then((data) => {
+        form_props.is_loading = false
         if (data.success) {
           router.push({
             name: 'event-detail',
@@ -247,12 +259,14 @@ export default {
     }
 
     function addTicketBundle() {
+      form_props.is_loading = true
       postData("ticket-bundle", {
         event_id: event_id,
         name: form.name,
         price: form.price,
         tickets: form.tickets
       }).then((data) => {
+        form_props.is_loading = false
         if (data.success) {
           router.push({
             name: 'event-detail',
@@ -279,7 +293,8 @@ export default {
       isAdded,
       closeTicketModal,
       addTicketBundle,
-      editTicketBundle
+      editTicketBundle,
+      money_config
     }
   }
 }

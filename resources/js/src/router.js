@@ -30,6 +30,8 @@ import EventDetail from "../pages/events/Detail.vue";
 import EditAddTicketBundle from "../pages/events/EditAddTicketBundle.vue";
 import EventClasses from "../pages/events-participants/EventClasses.vue";
 import EventVariantParticipants from "../pages/events-participants/EventVariantParticipants.vue";
+import Notification from "../pages/notifications/Index.vue";
+import NotificationEditAdd from "../pages/notifications/AddEdit.vue";
 
 const routes = [
     {
@@ -47,6 +49,8 @@ const routes = [
             { path: 'menus/:id', component: MenusAddEdit, meta: { protected: true, title: "Menu" } },
             { path: 'menu-role', component: MenuRole, meta: { protected: true, title: "Menu Role" } },
             { path: 'profile', component: Profile, meta: { protected: true, title: "Profile" } },
+            { path: 'notifications', component: Notification, meta: { protected: true, title: "Notifications" } },
+            { path: 'notifications/:id', component: NotificationEditAdd, meta: { protected: true, title: "Notification" } },
 
             // Payment Methods
             { path: 'payment-methods', component: PaymentMethods, meta: { protected: true, title: "Metode Pembayaran" } },

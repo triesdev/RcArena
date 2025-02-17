@@ -29,6 +29,7 @@ use App\Http\Controllers\Panel\FirebaseController;
 use App\Http\Controllers\Panel\TransactionController as PanelTransactionController;
 use App\Http\Controllers\Panel\PaymentMethodController as PanelPaymentMethodController;
 use App\Http\Controllers\Panel\PanelClassController;
+use App\Http\Controllers\Panel\PanelNotificationController;
 use App\Http\Controllers\Panel\TransactionDetailUsersController as PanelTransactionDetailUsersController;
 
 Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () {
@@ -83,6 +84,8 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
     Route::resource("payment-methods", PaymentMethodController::class);
 
     Route::get("notification", [NotificationController::class, 'index']);
+    Route::get("notification-count", [NotificationController::class, 'notificationCount']);
+    Route::patch("notification-read/{id}", [NotificationController::class, 'readNotification']);
 });
 
 Route::post("send-notification", [PanelAuthController::class, 'testSendNotification']);
@@ -141,4 +144,5 @@ Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], functio
 
     /*Payment Methods*/
     Route::resource("payment-methods", PanelPaymentMethodController::class);
+    Route::resource("notifications", PanelNotificationController::class);
 });
