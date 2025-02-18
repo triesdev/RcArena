@@ -17,10 +17,16 @@ class NotificationController extends ApiController
         if ($request->category === 'notification') {
             $data = Notification::where('category', $request->category)
                 ->where('user_id', $request->auth_user['id'])
-                ->offset($request->offset ?? 0)->limit($request->limit ?? 10)->get();
+                ->orderByDesc('created_at')
+                ->offset($request->offset ?? 0)
+                ->limit($request->limit ?? 10)
+                ->get();
         } else {
             $data = Notification::where('category', $request->category)
-                ->offset($request->offset ?? 0)->limit($request->limit ?? 10)->get();
+                ->orderByDesc('created_at')
+                ->offset($request->offset ?? 0)
+                ->limit($request->limit ?? 10)
+                ->get();
         }
         return $this->successResponse('Success', $data);
     }
@@ -49,7 +55,7 @@ class NotificationController extends ApiController
         return $this->successResponse();
     }
 
-    public function sendNotification(Request $request)
+    public function testSendNotification(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'fcm_token' => 'required',

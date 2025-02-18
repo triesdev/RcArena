@@ -88,8 +88,8 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
     Route::patch("notification-read/{id}", [NotificationController::class, 'readNotification']);
 });
 
-Route::post("send-notification", [PanelAuthController::class, 'testSendNotification']);
-Route::post("send-notification-topic", [PanelAuthController::class, 'sendNotificationTopic']);
+Route::post("send-notification", [NotificationController::class, 'testSendNotification']);
+Route::post("send-notification-topic", [NotificationController::class, 'sendNotificationTopic']);
 Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], function () {
     // Auth
     Route::post("login", [PanelAuthController::class, "login"])->withoutMiddleware([PanelToken::class]);

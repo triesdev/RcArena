@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Panel;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\Controller;
 use App\Http\Repository\TransactionRepository;
+use App\Http\Traits\FCM;
 use App\Models\Event;
 use App\Models\EventClass;
+use App\Models\Notification;
 use App\Models\Payment;
 use App\Models\Ticket;
 use App\Models\TicketBundle;
@@ -21,6 +23,7 @@ use PHPUnit\Util\Exception;
 
 class TransactionController extends ApiController
 {
+    use FCM;
     protected $stock_errors = [];
 
     /**
@@ -87,6 +90,7 @@ class TransactionController extends ApiController
         DB::beginTransaction();
 
         try {
+            $user = User::find($payment->user_id);
 
             $is_confirmed = 0;
             if ($confirm_type == 'confirmed'){
@@ -107,16 +111,38 @@ class TransactionController extends ApiController
                 // Generate Ticket
                 $this->generateTicketTransactionDetailUsers($transaction_id);
                 $transaction_status = "success";
+
+                // send notif confirmed
+                $this->createNotification($user, 'payment_success', [
+                    'title' => "Pembelian Berhasil",
+                    "message" => "Bukti pembayaran anda telah dikonfirmasi.",
+                    "page_route" => "/order_detail_view",
+                    "reference_id" => $transaction_id
+                ], 'success');
             }
 
             if ($confirm_type == 'reject'){
                 // Rollback Stock
                 $this->rollbackStock($transaction_id);
                 $transaction_status = "reject";
+
+                // send notif reject
+                $this->createNotification($user, 'payment_reject', [
+                    'title' => "Pembayaran Ditolak",
+                    "message" => "Bukti pembayaran anda tidak sesuai.",
+                    "page_route" => "/order_detail_view",
+                    "reference_id" => $transaction_id
+                ], 'danger');
             }
 
             if($confirm_type == 'pending'){
-                // Do nothing
+                // send notif pload ulang
+                $this->createNotification($user, 'payment_pending', [
+                    'title' => "Pembayaran Tidak Sesuai",
+                    "message" => "Bukti pembayaran tidak sesuai. Harap upload ulang bukti pembayaran.",
+                    "page_route" => "/order_detail_view",
+                    "reference_id" => $transaction_id
+                ], 'warning');
             }
 
             $transaction = Transaction::find($transaction_id);

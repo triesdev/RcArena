@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\ApiController;
+use App\Http\Traits\FCM;
 use App\Models\Cart;
 use App\Http\Repository\TransactionRepository;
 use App\Models\Event;
@@ -13,12 +14,14 @@ use App\Models\Ticket;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Models\TransactionDetailUser;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class TransactionController extends ApiController
 {
+    use FCM;
     public function index(Request $request)
     {
         // QUERY GENERATE
@@ -210,6 +213,15 @@ class TransactionController extends ApiController
             Cart::where('user_id', $auth_user->id)->delete();
 
             DB::commit();
+
+            $user = User::find($auth_user->id);
+            $this->createNotification($user, 'new_transaction', [
+                "title" => "Pembelian Tiket",
+                "message" => "Pembelian tiket berhasil. Silakan lakukan pembayaran.",
+                "page_route" => '/myticket_detail_view',
+                "reference_id" => $transaction->id,
+            ]);
+
             return $this->successResponse("Success", $transaction);
         } catch (\Exception $ex) {
             DB::rollBack();
@@ -272,6 +284,4 @@ class TransactionController extends ApiController
         ];
         return $map[(int)$month];
     }
-
-
 }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Traits;
 
+use App\Models\Notification;
+use App\Models\User;
 use Google\Auth\Credentials\ServiceAccountCredentials;
 
 trait FCM
@@ -37,13 +39,18 @@ trait FCM
 
     /**
      * Send Notification to a Single FCM Token
+     * data = [
+     *  "title" => "",
+     *  "message" => "",
+     *  "page_route" => "",
+     *  "reference_id" => "",
+     * ]
      */
     public function sendNotification($fcmToken = "", $data = [])
     {
-
         $response = [
             'status' => false,
-            'text' => "",
+            'text'   => "",
         ];
 
         // Validation
@@ -67,53 +74,44 @@ trait FCM
 
         $payload = [
             'message' => [
-                'token' => $fcmToken,
+                'token'        => $fcmToken,
                 'notification' => [
                     'title' => $data['title'],
-                    'body' => $data['message'],
+                    'body'  => $data['message'],
                 ],
-                'data' => [
-                    'page_route' => $data['page_route'],
+                'data'         => [
+                    'page_route'   => $data['page_route'],
                     'reference_id' => $data['reference_id'],
                 ]
             ]
         ];
 
-        // Send the request
-        //        try {
-        $ch = curl_init();
+        try {
+            $ch = curl_init();
 
-        curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/v1/projects/' . $this->projectId . '/messages:send');
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+            curl_setopt($ch, CURLOPT_URL, 'https://fcm.googleapis.com/v1/projects/' . $this->projectId . '/messages:send');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 
-        $headers = [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $accessToken,
-        ];
+            $headers = [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $accessToken,
+            ];
 
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-        $res = curl_exec($ch);
-        if (curl_errno($ch)) {
-            echo 'Error:' . curl_error($ch);
+            $res = curl_exec($ch);
+            if (curl_errno($ch)) {
+                echo 'Error:' . curl_error($ch);
+            }
+            curl_close($ch);
+
+            $response['status'] = true;
+            return $response;
+        } catch (\Exception $e) {
+            return $response;
         }
-        curl_close($ch);
-
-        return $res;
-        //
-        //            $response['status'] = true;
-        //            $response['text'] = "Success";
-        //            $response['response'] = $res;
-        //            $response['payload'] = $payload;
-        //            $response['header'] = $headers;
-        //        } catch (\Exception $e) {
-        //            $response['text'] = $e->getMessage();
-        //            return $response;
-        //        }
-        //
-        //        return $response;
     }
 
     /**
@@ -122,8 +120,7 @@ trait FCM
     public function sendMultipleNotif($fcmTokens, $data = [])
     {
         $response = [
-            'status' => false,
-            'text' => "",
+            'status'    => false,
             'responses' => []
         ];
 
@@ -158,14 +155,14 @@ trait FCM
             // Create individual payload for each token
             $payload = [
                 'message' => [
-                    'token' => $token,
+                    'token'        => $token,
                     'notification' => [
                         'title' => $data['title'],
-                        'body' => $data['message'],
+                        'body'  => $data['message'],
                     ],
-                    'data' => [
+                    'data'         => [
                         'page_route' => $data['route'],
-                        'id' => (string) $data['id'],
+                        'id'         => (string)$data['id'],
                     ]
                 ]
             ];
@@ -206,7 +203,7 @@ trait FCM
                 ];
             } else {
                 $response['responses'][] = [
-                    'token' => $token,
+                    'token'    => $token,
                     'response' => $res
                 ];
             }
@@ -232,7 +229,7 @@ trait FCM
     {
         $response = [
             'status' => false,
-            'text' => "",
+            'text'   => "",
         ];
 
         // Validation
@@ -262,14 +259,14 @@ trait FCM
 
         $payload = [
             'message' => [
-                'topic' => $topic,
+                'topic'        => $topic,
                 'notification' => [
                     'title' => $data['title'],
-                    'body' => $data['message'],
+                    'body'  => $data['message'],
                 ],
-                'data' => [
-                    'page_route' => $data['page_route'],
-                    'reference_id' => (string) $data['reference_id'],
+                'data'         => [
+                    'page_route'   => $data['page_route'],
+                    'reference_id' => (string)$data['reference_id'],
                 ]
             ]
         ];
@@ -299,5 +296,29 @@ trait FCM
         }
 
         return $response;
+    }
+
+    private function createNotification(User $user, $label, $data, $flag = 'success')
+    {
+        $notif = Notification::create([
+            "user_id" => $user->id,
+            "category" => "notification",
+            "label" => $label,
+            "flag" => $flag,
+            "title" => $data['title'],
+            "message" => $data['message'],
+            "page_route" => $data['page_route'],
+            "reference_id" => $data['reference_id'],
+            "status" => 1,
+            "is_read" => 0,
+        ]);
+
+        $res = $this->sendNotification($user->fcm_token, $data);
+
+        if(!$res['status']){
+            $notif->update([
+                'status' => false
+            ]);
+        }
     }
 }
