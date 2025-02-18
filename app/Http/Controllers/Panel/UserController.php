@@ -97,7 +97,7 @@ class UserController extends ApiController
         $data->update([
             'name' => $request->name,
             'phone_number' => $request->phone_number,
-            'role_id' => $request->role_id,
+            'role_id' => $role_id_default_mobile,
             'image_uri' => $request->image_uri,
         ]);
 
