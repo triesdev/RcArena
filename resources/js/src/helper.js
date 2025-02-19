@@ -38,4 +38,14 @@ function makeToken(length) {
     return result;
 }
 
-export { registerDeviceToken, todayDate, makeToken }
+function formatDateAndTime(date) {
+    const d = new Date(date)
+    const year = d.getFullYear()
+    const month = '02';
+    const day = d.getDate()
+    const hour = d.getHours()
+    const minute = d.getMinutes()
+    return `${year}-${month}-${day} ${hour}:${minute}`
+}
+
+export { registerDeviceToken, todayDate, makeToken, formatDateAndTime }

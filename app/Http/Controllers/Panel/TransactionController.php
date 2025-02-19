@@ -16,6 +16,7 @@ use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Models\TransactionDetailUser;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -61,6 +62,9 @@ class TransactionController extends ApiController
 
         $validator = Validator::make($request->all(), [
             'confirm_type' => 'required|in:confirmed,reject,pending',
+            'payment_limit_date' => 'required_if:confirm_type,pending',
+        ],[
+            'payment_limit_date.required_if' => 'Batas waktu upload harus di isi !'
         ]);
 
         if ($validator->fails()) {
@@ -146,11 +150,13 @@ class TransactionController extends ApiController
             }
 
             $transaction = Transaction::find($transaction_id);
+            $payment_limit_date = $request->payment_limit_date ?? $transaction->payment_limit_date;
             $transaction->update([
                 'transaction_status' => $transaction_status,
+                'payment_limit_date' => $payment_limit_date
             ]);
 
-            DB::commit();
+            DB::rollBack();
 
         } catch (\Exception $e) {
             DB::rollBack();

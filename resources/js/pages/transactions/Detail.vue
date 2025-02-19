@@ -101,13 +101,13 @@
                                                 </tbody>
                                             </table>
                                             <div v-if="data_content.data_detail.payment.payment_status == 'new'" class="flex justify-end mt-10 gap-2">
-                                                <button @click="openModalConfirm('Konfirmasi','confirmed')" class="btn btn-sm btn-primary">
+                                                <button @click="openModalPayment('Konfirmasi','confirmed')" class="btn btn-sm btn-primary">
                                                     Konfirmasi
                                                 </button>
-                                                <button v-if="data_content.data_detail.payment.nominal_payment > 0" @click="openModalConfirm('Upload Ulang','pending')" class="btn btn-sm btn-secondary">
+                                                <button v-if="data_content.data_detail.payment.nominal_payment > 0" @click="openModalPayment('Upload Ulang','pending')" class="btn btn-sm btn-secondary">
                                                     Upload Ulang Bukti Bayar
                                                 </button>
-                                                <button @click="openModalConfirm('Reject','reject')" class="btn btn-sm btn-danger">
+                                                <button @click="openModalPayment('Reject','reject')" class="btn btn-sm btn-danger">
                                                     Reject
                                                 </button>
                                             </div>
@@ -238,32 +238,69 @@
                 </div>
             </div>
         </div>
-        <WidgetContainerModal></WidgetContainerModal>
+        <!-- Modal Konfirmasi Payment -->
+        <div class="modal fade" id="modalPayment" tabindex="-1" aria-labelledby="modalPaymentLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-md modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bolder" id="modalPaymentLabel">
+                            {{payment_modal_data.title}}
+                        </h5>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form">
+                            <div class="form-group mb-4" v-if="payment_modal_data.confirm_type == 'pending'">
+                                <label class="fw-bold">Batas Waktu Upload Ulang</label>
+                                <VueCtkDateTimePicker v-model="payment_modal_form.payment_limit_date" v-bind="payment_modal_data.date_config">
+                                </VueCtkDateTimePicker>
+                                {{getMessage('payment_limit_date')}}
+                            </div>
+                            <div class="form-group">
+                                <label class="fw-bold" for="note">Catatan</label>
+                                <textarea v-model="payment_modal_form.note" class="form-control" id="note" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button :disabled="form_props.payment_modal_is_loading" @click="closeModalPayment()" type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                        <button :disabled="form_props.payment_modal_is_loading" @click="confirmModalPayment()" type="button"
+                                class="btn btn-primary">
+                            <span v-if="!form_props.payment_modal_is_loading">Proses Data</span>
+                            <span v-if="form_props.payment_modal_is_loading">Please wait...
+                                <span class="spinner-border spinner-border-sm align-middle ms-2"></span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Modal Daftar Pendaftar -->
     </div>
 </template>
 <script>
 import Breadcrumb from "../../components/Breadcrumb";
-import { reactive, ref } from "vue";
+import {onMounted, reactive, ref} from "vue";
 import useAxios from "../../src/service";
 import useValidation from "../../src/validation";
 import { useRouter, useRoute } from "vue-router";
 import Axios from "axios";
-import { container, promptModal} from "jenesius-vue-modal";
-import ModalApprove from "./ModalApprove.vue";
 import SwalToast from '../../src/swal_toast'
+import {formatDateAndTime} from "../../src/helper";
 
 export default {
-    components: { Breadcrumb, WidgetContainerModal: container },
+    components: { Breadcrumb },
     setup() {
-        const { getData, patchData, postData } = useAxios()
+        const { getData, patchData, basePatchData } = useAxios()
         const router = useRouter()
-        const { setErrors, getStatus, getMessage, resetErrors } = useValidation()
+        const { setErrors, getStatus, getMessage, resetErrors, getAllErrors } = useValidation()
         const route = useRoute()
         // Cek Mode
         const form_props = reactive({
             is_loading: false,
             errors: [],
             edit_mode: true,
+            payment_modal_is_loading: false,
         })
 
         const data_content = reactive({
@@ -365,20 +402,102 @@ export default {
             })
         }
 
-         async function openModalConfirm(title, confirm_type) {
-            const boolResp = await promptModal(ModalApprove, {
-                title: title,
-                payment_id: payment_id.value,
-                confirm_type: confirm_type
-            },{
-                backgroundClose: false,
-            });
+        // Payment Modal
+        const modalPayment = ref(null)
+        onMounted(() => {
+            // Initiate Bootstrap Modal
+            modalPayment.value = new bootstrap.Modal(document.getElementById('modalPayment'), {
+                keyboard: false,
+                backdrop: 'static'
+            })
+        })
 
-            if (boolResp) {
-                SwalToast('Berhasil memproses pembayaran.')
-                getDetail()
+        // Set Min And Max now + 15 minutes and last day from now
+        let min_date = new Date()
+        min_date.setMinutes(min_date.getMinutes() + 15)
+        min_date = formatDateAndTime(min_date)
+        
+
+        const payment_modal_data = ref(
+            {
+                title: '',
+                confirm_type: '',
+                date_config: {
+                    'range': false,
+                    'no-shortcuts': true,
+                    'no-label': true,
+                    'no': true,
+                    'formatted': 'YYYY-MM-DD HH:mm',
+                    'format': 'YYYY-MM-DD HH:mm',
+                    'locale': "id",
+                    'only-time': false,
+                    'label': 'Batas Waktu Upload Ulang',
+                    'min-date': min_date,
+                }
             }
+        )
+
+        const payment_modal_form = reactive({
+            note: "",
+            payment_limit_date: formatDateAndTime(min_date),
+            confirm_type: ""
+        })
+
+        async function openModalPayment(title, confirm_type) {
+            resetErrors();
+            payment_modal_data.value.title = title
+            payment_modal_data.value.confirm_type = confirm_type
+
+            modalPayment.value.show()
         }
+
+        async function closeModalPayment() {
+            modalPayment.value.hide()
+        }
+
+        async function confirmModalPayment() {
+            form_props.is_loading = true
+            let data = {
+                note: payment_modal_form.note,
+                payment_limit_date: payment_modal_form.payment_limit_date,
+                confirm_type: payment_modal_data.value.confirm_type
+            }
+
+            form_props.payment_modal_is_loading = true;
+            basePatchData('transaction-payment-process/' + payment_id.value, data)
+                .then(({data}) => {
+                    if (data.success) {
+                        SwalToast(
+                            `${payment_modal_data.value.title} berhasil diproses`,
+                            'success',
+                        )
+                        closeModalPayment()
+                        form_props.payment_modal_is_loading = false;
+                        getDetail()
+                    } else {
+                        SwalToast(
+                            `${payment_modal_data.value.title} gagal diproses`,
+                            'error',
+                        )
+                        form_props.payment_modal_is_loading = false;
+                    }
+                }).catch((error) => {
+                    SwalToast(
+                        `${payment_modal_data.value.title} gagal diproses`,
+                        'error'
+                    )
+
+                    // IF STATUS 400 (Validation Field)
+                    if (error.response.status === 422) {
+                        const error_message = JSON.parse(error.response.data.message)
+                        setErrors(error_message)
+                    }
+
+                    form_props.payment_modal_is_loading = false;
+                })
+        }
+
+        // End Payment Modal
 
         return {
             breadcrumb_list,
@@ -392,7 +511,11 @@ export default {
             acceptPayment,
             deletePayment,
             printName,
-            openModalConfirm,
+            payment_modal_data,
+            payment_modal_form,
+            openModalPayment,
+            closeModalPayment,
+            confirmModalPayment,
         }
     }
 }

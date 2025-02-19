@@ -32,11 +32,16 @@ export default function useValidation() {
         state.errors = []
     }
 
+    function getAllErrors() {
+        return state.errors
+    }
+
     return {
         getStatus,
         getMessage,
         setErrors,
         resetErrors,
-        removeError
+        removeError,
+        getAllErrors
     }
 }
