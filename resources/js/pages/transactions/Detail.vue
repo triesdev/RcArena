@@ -416,7 +416,7 @@ export default {
         let min_date = new Date()
         min_date.setMinutes(min_date.getMinutes() + 15)
         min_date = formatDateAndTime(min_date)
-        
+
 
         const payment_modal_data = ref(
             {
