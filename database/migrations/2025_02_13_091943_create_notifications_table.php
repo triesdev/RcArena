@@ -19,7 +19,7 @@ class CreateNotificationsTable extends Migration
             $table->string('category');
             $table->string('label');
             $table->string('flag')->nullable();
-            $table->string('title');
+            $table->text('title')->nullable();
             $table->string('message');
             $table->string('page_route')->nullable();
             $table->string('reference_id')->nullable();

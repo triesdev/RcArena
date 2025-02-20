@@ -81,7 +81,7 @@ trait FCM
                 ],
                 'data'         => [
                     'page_route'   => $data['page_route'],
-                    'reference_id' => $data['reference_id'],
+                    'reference_id' => (string) $data['reference_id'],
                 ]
             ]
         ];
@@ -103,13 +103,14 @@ trait FCM
 
             $res = curl_exec($ch);
             if (curl_errno($ch)) {
-                echo 'Error:' . curl_error($ch);
+                $response['text'] =  'Error:' . curl_error($ch);
             }
             curl_close($ch);
 
             $response['status'] = true;
             return $response;
         } catch (\Exception $e) {
+            $response['text'] = $e->getMessage();
             return $response;
         }
     }
@@ -317,8 +318,11 @@ trait FCM
 
         if(!$res['status']){
             $notif->update([
-                'status' => false
+                'status' => 2,
+                'message' => $res['text']
             ]);
         }
+
+        return $res;
     }
 }

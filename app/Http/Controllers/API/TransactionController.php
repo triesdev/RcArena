@@ -218,7 +218,7 @@ class TransactionController extends ApiController
             $this->createNotification($user, 'new_transaction', [
                 "title" => "Pembelian Tiket",
                 "message" => "Pembelian tiket berhasil. Silakan lakukan pembayaran.",
-                "page_route" => '/myticket_detail_view',
+                "page_route" => '/order_detail_view',
                 "reference_id" => $transaction->id,
             ]);
 
