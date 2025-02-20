@@ -22,7 +22,13 @@ class TicketUserController extends ApiController
 
     public function userTicketsByTransactionId($transaction_id, Request $request){
         $auth_user = $request->auth_user;
+
         $transactions = (new TransactionRepository())->getTicketsByTransactionId2($transaction_id, $auth_user);
+
+        if (!$transactions) {
+            return $this->errorResponse("Data not found", null, 404);
+        }
+
         return $this->successResponse("Success", $transactions);
     }
 

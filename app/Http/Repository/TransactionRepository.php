@@ -272,6 +272,13 @@ class TransactionRepository extends ApiController
             "events.event_end as event_end_date",
         )->find($transaction_id);
 
+        if (!$transactions) {
+            return null;
+        }
+
+        // tambah is past event untuk handle di mobile apakah event sudah lewat atau belum
+        $transactions->is_past_event = strtotime($transactions->event_end_date) < strtotime(date('Y-m-d H:i:s'));
+
         // Untuk mapping dan mengubah status bisa di transfer atau tidak
         $transactions->transaction_detail_users = $transactions->transaction_detail_users->map(function ($transaction_detail_user) use ($auth_user) {
             if ($auth_user->user_type_mobile == "coordinator" && $transaction_detail_user->is_transfered == 0 && $transaction_detail_user->ticket_user_type == 'community') {
@@ -280,6 +287,7 @@ class TransactionRepository extends ApiController
             } else {
                 $transaction_detail_user->enable_transfer = false;
             }
+
             return $transaction_detail_user;
         });
 
