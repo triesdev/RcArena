@@ -20,6 +20,12 @@ class TicketController extends ApiController
 
         return $this->successResponse("Success", $data);
     }
+    public function show($id)
+    {
+        $data = Ticket::find($id);
+
+        return $this->successResponse("Success", $data);
+    }
 
     public function store(Request $request)
     {
