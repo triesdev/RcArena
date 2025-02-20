@@ -32,6 +32,9 @@ use App\Http\Controllers\Panel\PanelClassController;
 use App\Http\Controllers\Panel\PanelNotificationController;
 use App\Http\Controllers\Panel\TransactionDetailUsersController as PanelTransactionDetailUsersController;
 
+use App\Http\Controllers\TestController;
+Route::get('test',[TestController::class,'testCronAutoRejectTransactionWithPayment']);
+
 Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () {
 
     // Guest Mode

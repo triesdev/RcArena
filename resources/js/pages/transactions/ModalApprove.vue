@@ -5,8 +5,13 @@
         </div>
         <div class="card-body">
             <div class="form">
+                <div class="form-group mb-4" v-if="$props.confirm_type == 'pending'">
+                    <label class="fw-bold">Batas Waktu Upload Ulang</label>
+                    <VueCtkDateTimePicker v-model="form.payment_limit_date" v-bind="date_config">
+                    </VueCtkDateTimePicker>
+                </div>
                 <div class="form-group">
-                    <label for="note">Catatan</label>
+                    <label class="fw-bold" for="note">Catatan</label>
                     <textarea v-model="form.note" class="form-control" id="note" rows="3"></textarea>
                 </div>
             </div>
@@ -33,20 +38,23 @@ export default {
     },
     setup(props, {emit}) {
 
-        const { patchData } = useAxios();
+        const { basePatchData } = useAxios();
 
         const form = ref({
             note: "",
+            payment_limit_date: "",
             confirm_type: props.confirm_type
         });
 
         function saveButton() {
             /*Update Data*/
-            patchData(`transaction-payment-process/${props.payment_id}`, form.value)
+            basePatchData(`transaction-payment-process/${props.payment_id}`, form.value)
                 .then(() => {
+                    console.log('success')
                     emit(Modal.EVENT_PROMPT, 1);
                 })
                 .catch(() => {
+                    console.log('failed')
                     emit(Modal.EVENT_PROMPT, 0);
                 });
         }
@@ -55,10 +63,25 @@ export default {
             emit(Modal.EVENT_PROMPT, 0);
         }
 
+        const date_config = ref(
+            {
+                'range': false,
+                'no-shortcuts': true,
+                'no-label': true,
+                'no': true,
+                'formatted': 'hh:mm',
+                'format': 'hh:mm',
+                'locale': "id",
+                'only-time': true,
+                'label': 'Batas Waktu Upload Ulang'
+            }
+        )
+
         return {
             rejectButton,
             saveButton,
-            form
+            form,
+            date_config
         }
     }
 }
