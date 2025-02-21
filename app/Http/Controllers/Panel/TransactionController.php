@@ -156,7 +156,7 @@ class TransactionController extends ApiController
                 'payment_limit_date' => $payment_limit_date
             ]);
 
-            DB::rollBack();
+            DB::commit();
 
         } catch (\Exception $e) {
             DB::rollBack();
