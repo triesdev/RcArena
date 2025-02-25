@@ -166,7 +166,7 @@ class TransactionController extends ApiController
         return $this->successResponse('Payment Process', $payment);
     }
 
-    private function rollbackStock($transaction_id)
+    public function rollbackStock($transaction_id)
     {
         $transaction_details = TransactionDetail::whereTransactionId($transaction_id)->orderBy("id")->get();
         $ticket_ids = $transaction_details->pluck('ticket_id')->toArray();

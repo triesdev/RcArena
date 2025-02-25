@@ -1,5 +1,6 @@
 <?php
 namespace App\Console;
+use App\Http\Controllers\Panel\TransactionController;
 use App\Models\Event;
 use App\Models\Transaction;
 
@@ -38,6 +39,7 @@ class ScheduleHandler {
             ->get();
 
         // Update Transaction Status Reject
+        $transactionControllerPanel = new TransactionController();
         foreach ($transactions as $transaction) {
             $transaction->update(
                 [
@@ -53,6 +55,9 @@ class ScheduleHandler {
                     ]
                 );
             }
+
+            // Rollback Stock
+            $transactionControllerPanel->rollbackStock($transaction->id);
         }
     }
 
