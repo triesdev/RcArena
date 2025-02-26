@@ -228,7 +228,7 @@ export default {
         }
 
         function getTicketById(){
-            getData('tickets/' + ticket_id)
+            getData('tickets/detail-ticket-participant/' + ticket_id)
                 .then((data) => {
                     if (data.success) {
                         ticket_data.value = data.result

@@ -153,7 +153,7 @@
                     </div>
                     <div class="modal-footer">
                         <button @click="closeModalDaftarPendaftar()" type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                        <button @click="redirectToDetailParticipants(modal_daftar_form.class_id)" type="button"
+                        <button @click="redirectToDetailParticipants(modal_daftar_form.variant_id)" type="button"
                             class="btn btn-primary">Lihat Data</button>
                     </div>
                 </div>
@@ -288,7 +288,7 @@ export default {
             }
         }, {deep: true});
 
-        const redirectToDetailParticipants = (class_id) => {
+        const redirectToDetailParticipants = (variant_id) => {
 
             // Check Form Validation
             if (!modal_daftar_form.value.class_id) {
@@ -301,7 +301,7 @@ export default {
                 return
             }
 
-           router.push(`/panel/event-variant-participants/${class_id}`)
+           router.push(`/panel/event-variant-participants/${variant_id}`)
         }
 
         const closeModalDaftarPendaftar = () => {

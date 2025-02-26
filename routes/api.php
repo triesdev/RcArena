@@ -125,7 +125,7 @@ Route::group(['prefix' => "panel", "middleware" => [PanelToken::class]], functio
 
     /*Tiket*/
     Route::group(['prefix' => 'tickets'], function () {
-        Route::get("/{ticket_id}", [PanelTicketController::class, 'getByTicketId']);
+        Route::get("detail-ticket-participant/{ticket_id}", [PanelTicketController::class, 'getByTicketId']);
         Route::get("participants/{ticket_id}", [PanelTicketController::class, 'getTicketParticipantsByTicketId']);
     });
     /*End Ticket*/

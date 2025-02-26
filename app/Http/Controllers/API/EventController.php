@@ -19,7 +19,13 @@ class EventController extends ApiController
     public function getEventHome()
     {
         try {
-            $events = Event::select("id","image_uri")->whereIsActive(1)->get();
+            $now = date("Y-m-d H:i:s");
+            $events = Event::select("id","image_uri")
+                ->whereIsActive(1)
+//                ->where("event_launch_at", "<=", $now)
+//                ->where("event_end", ">=", $now)
+//                ->orderBy("event_launch_at", "desc")
+                ->get();
             return $this->successResponse("Successs", $events);
         } catch (\Exception $ex) {
             return $this->errorResponse($ex->getMessage());
