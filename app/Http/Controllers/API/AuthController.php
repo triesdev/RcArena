@@ -210,7 +210,7 @@ class AuthController extends ApiController
 
         } catch (\Exception $exception) {
             Log::error("Apple login error: " . $exception->getMessage());
-            return $this->errorResponse("Upss... terjadi kesalahan apple :(", $exception->getMessage());
+            return $this->errorResponse("Upss... terjadi kesalahan apple :(", 'ERR SSO Apple');
         }
 
         return $this->successResponse("Success", [
