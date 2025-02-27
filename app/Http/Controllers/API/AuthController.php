@@ -148,4 +148,74 @@ class AuthController extends ApiController
 
         return $this->successResponse();
     }
+
+    public function loginApple(Request $request)
+    {
+        $validator = Validator::make([
+            'id_token'    => 'required',
+        ],[
+            'id_token.required'    => 'Token tidak boleh kosong',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationErrorResponse();
+        }
+
+        $client = new Client();
+        $endpoint = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithIdp?key=" . env('FB_API_KEY');
+        try {
+            $response = $client->request(
+                'POST',
+                $endpoint,
+                [
+                    'form_params' => [
+                        "postBody"            => "id_token=".$request->id_token . "&providerId=apple.com",
+                        "requestUri"          => "http://localhost",
+                        "returnIdpCredential" => true,
+                        "returnSecureToken"   => true
+                    ]
+                ]
+            );
+
+            $dataApple =  json_decode((string)$response->getBody(), true);
+
+            $email = $dataApple['email'] ?? null;
+            $password = Hash::make(rand(100000, 999999));
+            $image_uri = $userInfo['picture'] ?? null;
+            $name = explode('@', $email)[0];
+
+            /*Create Or Update Users Type Mobile*/
+            $user = User::whereEmail($email)->first();
+            if (!$user) {
+                $user = User::create([
+                    'user_code' => StringGenerator::generateUserCode(),
+                    'name' => $name,
+                    'email' => $email,
+                    'password' => $password,
+                    'phone_number' => '',
+                    'user_type_mobile' => 'regular',
+                    'image_uri' => $image_uri,
+                    'api_token' => StringGenerator::generateAlphanumeric(60),
+                    'role_id' => Role::whereIsDefault(1)->whereType('mobile')->first()->id,
+                ]);
+            } else {
+                $user->update([
+                    'name' => $name,
+                    'image_uri' => $image_uri,
+                    'api_token' => StringGenerator::generateAlphanumeric(60)
+                ]);
+            }
+
+            $token_login = StringGenerator::generateAlphanumeric(60);
+
+        } catch (\Exception $exception) {
+            Log::error("Apple login error: " . $exception->getMessage());
+            return $this->errorResponse("Upss... terjadi kesalahan apple :(", $exception->getMessage());
+        }
+
+        return $this->successResponse("Success", [
+            "user" => $dataApple,
+            "token" => $token_login
+        ]);
+    }
 }

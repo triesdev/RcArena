@@ -42,6 +42,7 @@ Route::group(['prefix' => "v1", "middleware" => [ApiToken::class]], function () 
 
     // Auth
     Route::post("login-sso", [AuthController::class, 'SSOLogin'])->withoutMiddleware([ApiToken::class]);
+    Route::post("login-apple", [AuthController::class, 'loginApple'])->withoutMiddleware([ApiToken::class]);
     Route::post("login", [AuthController::class, "Login"])->withoutMiddleware([ApiToken::class]);
     Route::post("register", [AuthController::class, "Register"])->withoutMiddleware([ApiToken::class]);
     Route::get("auth", [AuthController::class, "Auth"]);
