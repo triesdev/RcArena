@@ -42,7 +42,18 @@ class TransactionDetailUsersController extends ApiController
             }
         }
 
+
         $transaction_user = TransactionDetailUser::find($transaction_detail_user_id);
+
+        // Check Chair Number If Other Have Same Chair Number
+        $check_chair_number = TransactionDetailUser::where('participant_chair_number', $request->participant_chair_number)
+            ->where('ticket_id', $transaction_user->ticket_id)
+            ->where('id', '!=', $transaction_detail_user_id)
+            ->first();
+
+        if ($check_chair_number) {
+            return $this->errorResponse("Participant Chair Number is already used", null, 422);
+        }
 
         if ($transaction_user) {
             $transaction_user->update(

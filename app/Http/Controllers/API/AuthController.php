@@ -121,8 +121,8 @@ class AuthController extends ApiController
                 ]);
             } else {
                 $user->update([
-                    'name' => $name,
-                    'image_uri' => $image_uri,
+//                    'name' => $name,
+//                    'image_uri' => $image_uri,
                     'api_token' => StringGenerator::generateAlphanumeric(60)
                 ]);
             }
@@ -186,6 +186,7 @@ class AuthController extends ApiController
 
             /*Create Or Update Users Type Mobile*/
             $user = User::whereEmail($email)->first();
+            $token_login = StringGenerator::generateAlphanumeric(60);
             if (!$user) {
                 $user = User::create([
                     'user_code' => StringGenerator::generateUserCode(),
@@ -195,18 +196,16 @@ class AuthController extends ApiController
                     'phone_number' => '',
                     'user_type_mobile' => 'regular',
                     'image_uri' => $image_uri,
-                    'api_token' => StringGenerator::generateAlphanumeric(60),
+                    'api_token' => $token_login,
                     'role_id' => Role::whereIsDefault(1)->whereType('mobile')->first()->id,
                 ]);
             } else {
                 $user->update([
                     'name' => $name,
                     'image_uri' => $image_uri,
-                    'api_token' => StringGenerator::generateAlphanumeric(60)
+                    'api_token' => $token_login
                 ]);
             }
-
-            $token_login = StringGenerator::generateAlphanumeric(60);
 
         } catch (\Exception $exception) {
             Log::error("Apple login error: " . $exception->getMessage());
@@ -214,7 +213,7 @@ class AuthController extends ApiController
         }
 
         return $this->successResponse("Success", [
-            "user" => $dataApple,
+            "user" => $user,
             "token" => $token_login
         ]);
     }

@@ -355,7 +355,7 @@ export default {
                 loadDataContent()
             }).catch((error) => {
                 // IF STATUS 401
-                if (error.response.status === 401) {
+                if (error.response.status === 401 || error.response.status === 422) {
                     Swal.fire({
                         icon: 'warning',
                         title: 'Password Salah',

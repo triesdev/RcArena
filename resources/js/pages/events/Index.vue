@@ -43,7 +43,9 @@
                                             <th>No</th>
                                             <th style="width: 90px;"></th>
                                             <th>Nama</th>
-                                            <th>Tanggal</th>
+                                            <th>Tanggal Peluncuran</th>
+                                            <th>Tanggal Pembelian Tiket</th>
+                                            <th>Tanggal Event</th>
                                             <th class="text-end">Aksi</th>
                                         </tr>
                                     </thead>
@@ -61,6 +63,8 @@
                                                     class="img-thumbnail"></div>
                                             </td>
                                             <td>{{ data.name }}</td>
+                                            <td>{{ $filter.formatDate(data.event_launch_at) }}</td>
+                                            <td>{{ $filter.formatDate(data.ticket_purchasing_at) }}</td>
                                             <td>{{ $filter.formatDate(data.event_date) }}</td>
                                             <td class="text-end">
                                                 <div class="dropdown">

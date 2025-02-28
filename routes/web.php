@@ -28,7 +28,6 @@ Route::get('/delete-account', function () {
     return view('delete-account');
 });
 
-
 Route::get('/panel', [PanelAuthController::class, 'adminPanel']);
 Route::get('/panel/{path}', [PanelAuthController::class, 'adminPanel'])->where('path', '([A-z\d\-\/_.]+)?');
 
